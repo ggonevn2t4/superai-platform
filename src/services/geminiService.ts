@@ -37,7 +37,7 @@ export interface GeminiResponse {
  */
 export const sendMessageToGemini = async (messageContent: string): Promise<string> => {
   try {
-    const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-2.0:generateContent';
+    const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
     
     const requestBody: GeminiRequest = {
       contents: [

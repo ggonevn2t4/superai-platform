@@ -21,8 +21,8 @@ const models: Model[] = [
   },
   { 
     id: 'gemini-2', 
-    name: 'Gemini Flash 2.0', 
-    description: 'Mô hình flash tiên tiến từ Google' 
+    name: 'Gemini 1.5 Pro', 
+    description: 'Mô hình tiên tiến nhất từ Google' 
   },
   { 
     id: 'claude-3-7', 
