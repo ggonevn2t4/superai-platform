@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Bot, User, CheckCheck, Copy, Code, Globe, Download, ThumbsUp, ThumbsDown, Smile, Heart, Sparkles } from 'lucide-react';
@@ -40,8 +39,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onFeedback }) => {
     
     setIsTranslating(true);
     try {
-      // In a real implementation, this would call a translation API
-      // For now, we'll just simulate it with a timeout
       await new Promise(resolve => setTimeout(resolve, 1000));
       const translatedText = `[Bản dịch] ${message.content}`;
       setTranslation(translatedText);
@@ -71,32 +68,33 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onFeedback }) => {
     }
   };
 
-  // Hàm xử lý để loại bỏ ký tự # và * và thêm icon thân thiện
   const prettifyContent = (content: string) => {
-    // Loại bỏ ký tự # và *
     let prettified = content.replace(/[#*]/g, '');
     
-    // Thêm biểu tượng thân thiện nhưng không quá nhiều
     if (message.role === 'assistant' && !message.isError) {
-      // Xác định xem có nên thêm biểu tượng hay không (chỉ thêm cho một số tin nhắn)
-      const shouldAddIcon = Math.random() > 0.7; // 30% cơ hội thêm biểu tượng
+      const shouldAddIcon = Math.random() > 0.7;
       
       if (shouldAddIcon) {
-        // Thêm biểu tượng ngẫu nhiên ở đầu các đoạn văn
         const icons = [
-          <Smile className="inline-block mr-1 text-primary" size={16} />,
-          <Heart className="inline-block mr-1 text-rose-500" size={16} />,
-          <Sparkles className="inline-block mr-1 text-amber-500" size={16} />
+          <Smile key="smile-icon" className="inline-block mr-1 text-primary" size={16} />,
+          <Heart key="heart-icon" className="inline-block mr-1 text-rose-500" size={16} />,
+          <Sparkles key="sparkles-icon" className="inline-block mr-1 text-amber-500" size={16} />
         ];
         
-        // Chọn ngẫu nhiên một biểu tượng
         const randomIcon = icons[Math.floor(Math.random() * icons.length)];
         
-        // Thêm biểu tượng vào đầu đoạn văn đầu tiên
         const paragraphs = prettified.split('\n\n');
         if (paragraphs.length > 0) {
-          paragraphs[0] = <span key="icon-prefix">{randomIcon} {paragraphs[0]}</span>;
-          return paragraphs.map((p, i) => <p key={i} className="whitespace-pre-wrap mb-3">{i === 0 ? paragraphs[0] : p}</p>);
+          return (
+            <>
+              <p key="first-paragraph" className="whitespace-pre-wrap mb-3">
+                {randomIcon} {paragraphs[0]}
+              </p>
+              {paragraphs.slice(1).map((p, i) => (
+                <p key={`p-${i}`} className="whitespace-pre-wrap mb-3">{p}</p>
+              ))}
+            </>
+          );
         }
       }
     }
@@ -104,9 +102,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onFeedback }) => {
     return <p className="whitespace-pre-wrap">{prettified}</p>;
   };
   
-  // Format content to display code blocks properly
   const formatContent = (content: string) => {
-    // Basic markdown-like code block detection with ```
     if (!content.includes('```')) {
       return prettifyContent(content);
     }
@@ -117,7 +113,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message, onFeedback }) => {
       <>
         {parts.map((part, index) => {
           if (part.startsWith('```') && part.endsWith('```')) {
-            // Extract language if specified
             const firstLineEnd = part.indexOf('\n');
             const language = part.substring(3, firstLineEnd).trim();
             const code = part.substring(firstLineEnd + 1, part.length - 3);
