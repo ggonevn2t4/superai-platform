@@ -19,6 +19,28 @@ serve(async (req) => {
       throw new Error('Text is required');
     }
     
+    // Calculate a hash of the text and voice parameters for cache validation
+    const contentHash = await crypto.subtle.digest(
+      "SHA-1",
+      new TextEncoder().encode(`${text}-${voice}`)
+    );
+    const etag = Array.from(new Uint8Array(contentHash))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+      
+    // Check if the request includes a matching ETag
+    const clientETag = req.headers.get("If-None-Match");
+    if (clientETag === `"${etag}"`) {
+      return new Response(null, { 
+        status: 304, 
+        headers: { 
+          ...corsHeaders, 
+          'ETag': `"${etag}"`,
+          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+        } 
+      });
+    }
+    
     // Generate speech using OpenAI TTS API
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
@@ -49,7 +71,14 @@ serve(async (req) => {
       JSON.stringify({ 
         audioContent: `data:audio/mp3;base64,${base64Audio}` 
       }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'ETag': `"${etag}"`,
+          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+        } 
+      }
     );
   } catch (error) {
     console.error('Error converting text to speech:', error);

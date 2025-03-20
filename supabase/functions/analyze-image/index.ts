@@ -5,6 +5,8 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts"
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Cache-Control': 'public, max-age=1800', // Cache for 30 minutes
+  'Vary': 'Origin'
 }
 
 serve(async (req) => {
@@ -18,6 +20,27 @@ serve(async (req) => {
     
     if (!imageBase64) {
       throw new Error('No image data provided');
+    }
+    
+    // Calculate a simple hash of the image data for cache validation
+    const imageHashBuffer = await crypto.subtle.digest(
+      "SHA-1",
+      new TextEncoder().encode(imageBase64.substring(0, 1000))
+    );
+    const imageHash = Array.from(new Uint8Array(imageHashBuffer))
+      .map(b => b.toString(16).padStart(2, "0"))
+      .join("");
+      
+    // Check if the request includes a matching ETag
+    const clientETag = req.headers.get("If-None-Match");
+    if (clientETag === `"${imageHash}"`) {
+      return new Response(null, { 
+        status: 304, 
+        headers: { 
+          ...corsHeaders, 
+          'ETag': `"${imageHash}"` 
+        } 
+      });
     }
     
     // Call OpenAI API for image analysis
@@ -56,7 +79,13 @@ serve(async (req) => {
     
     return new Response(
       JSON.stringify({ analysis }),
-      { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      { 
+        headers: { 
+          ...corsHeaders, 
+          'Content-Type': 'application/json',
+          'ETag': `"${imageHash}"` 
+        } 
+      }
     );
   } catch (error) {
     console.error('Error analyzing image:', error);

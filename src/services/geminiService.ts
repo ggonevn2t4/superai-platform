@@ -2,6 +2,8 @@
 // API key cho Gemini
 export const GEMINI_API_KEY = 'AIzaSyCehIeceHVA3z9EeQcwaK2GfaELT1LeG2Q';
 
+import { cacheService } from './cacheService';
+
 // Interface cho request và response
 export interface GeminiMessage {
   role: 'user' | 'model';
@@ -37,6 +39,7 @@ export interface GeminiConfig {
   topP?: number;
   topK?: number;
   maxOutputTokens?: number;
+  skipCache?: boolean; // New option to skip cache
 }
 
 export interface GeminiError {
@@ -70,6 +73,24 @@ export const sendMessageToGemini = async (
   config: GeminiConfig = {}
 ): Promise<string | GeminiError> => {
   try {
+    // Generate cache key based on message and configuration
+    const cacheKey = cacheService.generateCacheKey('gemini', {
+      message: messageContent,
+      temperature: config.temperature ?? 0.7,
+      topP: config.topP ?? 0.95,
+      topK: config.topK ?? 40,
+      maxOutputTokens: config.maxOutputTokens ?? 2048
+    });
+    
+    // Check cache first if not explicitly skipped
+    if (!config.skipCache) {
+      const cachedResult = cacheService.get<string | GeminiError>(cacheKey);
+      if (cachedResult) {
+        console.log('Using cached Gemini response');
+        return cachedResult;
+      }
+    }
+    
     const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
     
     const requestBody: GeminiRequest = {
@@ -103,40 +124,49 @@ export const sendMessageToGemini = async (
       
       // Xử lý lỗi quota vượt quá
       if (errorCode === 429) {
-        return {
+        const errorResponse = {
           isError: true,
           code: errorCode,
           message: 'Quota API của Gemini đã hết. Vui lòng thử lại sau hoặc sử dụng một API key khác.',
           status: errorStatus
-        };
+        } as GeminiError;
+        return errorResponse;
       }
       
-      return {
+      const errorResponse = {
         isError: true,
         code: errorCode,
         message: errorMsg,
         status: errorStatus
-      };
+      } as GeminiError;
+      return errorResponse;
     }
     
     const data: GeminiResponse = await response.json();
     
     if (data.candidates && data.candidates.length > 0 && data.candidates[0].content.parts.length > 0) {
-      return data.candidates[0].content.parts[0].text;
+      const result = data.candidates[0].content.parts[0].text;
+      
+      // Cache successful response for 5 minutes
+      cacheService.set(cacheKey, result, 5 * 60 * 1000);
+      
+      return result;
     } else {
-      return {
+      const errorResponse = {
         isError: true,
         code: 0,
         message: 'Không nhận được phản hồi hợp lệ từ Gemini API'
-      };
+      } as GeminiError;
+      return errorResponse;
     }
   } catch (error) {
     console.error('Lỗi khi gọi Gemini API:', error);
-    return {
+    const errorResponse = {
       isError: true,
       code: 500,
       message: error instanceof Error ? error.message : 'Lỗi không xác định khi gọi API'
-    };
+    } as GeminiError;
+    return errorResponse;
   }
 };
 
@@ -147,6 +177,25 @@ export const sendMessageWithSystemInstructions = async (
   config: GeminiConfig = {}
 ): Promise<string | GeminiError> => {
   try {
+    // Generate cache key based on message, system instructions, and configuration
+    const cacheKey = cacheService.generateCacheKey('gemini-system', {
+      message: messageContent,
+      systemInstructions,
+      temperature: config.temperature ?? 0.7,
+      topP: config.topP ?? 0.95,
+      topK: config.topK ?? 40,
+      maxOutputTokens: config.maxOutputTokens ?? 2048
+    });
+    
+    // Check cache first if not explicitly skipped
+    if (!config.skipCache) {
+      const cachedResult = cacheService.get<string | GeminiError>(cacheKey);
+      if (cachedResult) {
+        console.log('Using cached Gemini system response');
+        return cachedResult;
+      }
+    }
+    
     const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
     
     const requestBody: GeminiRequest = {
@@ -188,39 +237,48 @@ export const sendMessageWithSystemInstructions = async (
       
       // Xử lý lỗi quota vượt quá
       if (errorCode === 429) {
-        return {
+        const errorResponse = {
           isError: true,
           code: errorCode,
           message: 'Quota API của Gemini đã hết. Vui lòng thử lại sau hoặc sử dụng một API key khác.',
           status: errorStatus
-        };
+        } as GeminiError;
+        return errorResponse;
       }
       
-      return {
+      const errorResponse = {
         isError: true,
         code: errorCode,
         message: errorMsg,
         status: errorStatus
-      };
+      } as GeminiError;
+      return errorResponse;
     }
     
     const data: GeminiResponse = await response.json();
     
     if (data.candidates && data.candidates.length > 0 && data.candidates[0].content.parts.length > 0) {
-      return data.candidates[0].content.parts[0].text;
+      const result = data.candidates[0].content.parts[0].text;
+      
+      // Cache successful response for 5 minutes
+      cacheService.set(cacheKey, result, 5 * 60 * 1000);
+      
+      return result;
     } else {
-      return {
+      const errorResponse = {
         isError: true,
         code: 0,
         message: 'Không nhận được phản hồi hợp lệ từ Gemini API'
-      };
+      } as GeminiError;
+      return errorResponse;
     }
   } catch (error) {
     console.error('Lỗi khi gọi Gemini API:', error);
-    return {
+    const errorResponse = {
       isError: true,
       code: 500,
       message: error instanceof Error ? error.message : 'Lỗi không xác định khi gọi API'
-    };
+    } as GeminiError;
+    return errorResponse;
   }
 };
