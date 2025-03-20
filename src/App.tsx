@@ -13,6 +13,7 @@ import Auth from "./pages/Auth";
 import Tools from "./pages/Tools";
 import NotFound from "./pages/NotFound";
 import SharedChat from "./pages/SharedChat";
+import Browser from "./pages/Browser";
 
 const queryClient = new QueryClient();
 
@@ -38,7 +39,7 @@ const App = () => (
                   <Tools />
                 </ProtectedRoute>
               } />
-              <Route path="/browser" element={<NotFound />} />
+              <Route path="/browser" element={<Browser />} />
               <Route path="/creative" element={<NotFound />} />
               <Route path="/wisebase" element={<NotFound />} />
               <Route path="/help" element={<NotFound />} />

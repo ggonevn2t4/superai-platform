@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
