@@ -1,9 +1,10 @@
+
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Paperclip, Mic, StopCircle, RotateCcw, Settings, Download, Filter } from 'lucide-react';
+import { Send, Paperclip, Mic, StopCircle, RotateCcw, Settings, Download, Filter, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import ChatMessage, { Message } from './ChatMessage';
 import ModelSelector from '../ui/ModelSelector';
-import { sendMessageToGemini } from '../../services/geminiService';
+import { sendMessageToGemini, GeminiError } from '../../services/geminiService';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { cn } from '@/lib/utils';
@@ -25,13 +26,14 @@ const ChatInterface: React.FC = () => {
   
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [model, setModel] = useState('gpt-4o');
+  const [model, setModel] = useState('gemini-2');
   const [isRecording, setIsRecording] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(2048);
   const [filterResult, setFilterResult] = useState(false);
+  const [apiKeyError, setApiKeyError] = useState(false);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -65,9 +67,10 @@ const ChatInterface: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setApiKeyError(false);
     
     try {
-      let response: string;
+      let response: string | GeminiError;
       
       if (model === 'gemini-2') {
         response = await sendMessageToGemini(input, {
@@ -78,21 +81,49 @@ const ChatInterface: React.FC = () => {
         response = `Đây là phản hồi mẫu từ mô hình ${model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`;
       }
       
-      if (filterResult) {
-        response = response.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '[Liên kết đã bị lọc]');
+      if (typeof response === 'string') {
+        if (filterResult) {
+          response = response.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '[Liên kết đã bị lọc]');
+        }
+        
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: response,
+          timestamp: new Date()
+        };
+        
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        // Xử lý các lỗi từ API
+        if (response.code === 429) {
+          setApiKeyError(true);
+          toast.error('Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key.');
+        }
+        
+        const errorMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: `❌ **Lỗi:** ${response.message}`,
+          timestamp: new Date(),
+          isError: true
+        };
+        
+        setMessages(prev => [...prev, errorMessage]);
       }
-      
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: response,
-        timestamp: new Date()
-      };
-      
-      setMessages(prev => [...prev, assistantMessage]);
     } catch (error) {
       console.error('Lỗi khi xử lý tin nhắn:', error);
       toast.error('Đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.');
+      
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: '❌ **Lỗi:** Đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.',
+        timestamp: new Date(),
+        isError: true
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -193,6 +224,21 @@ const ChatInterface: React.FC = () => {
   
   return (
     <div className="relative flex flex-col h-screen">
+      {apiKeyError && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex-1 overflow-y-auto pb-32" ref={scrollContainerRef}>
         <div className="py-4 px-4">
           {messages.map((message) => (
@@ -327,7 +373,7 @@ const ChatInterface: React.FC = () => {
                     adjustTextareaHeight();
                   }}
                   onKeyDown={handleKeyDown}
-                  placeholder="Nhập tin nhắn của bạn..."
+                  placeholder={apiKeyError ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
                   className="w-full pl-4 pr-12 py-3 h-12 max-h-[200px] rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                   disabled={isLoading}
                   rows={1}
@@ -347,7 +393,7 @@ const ChatInterface: React.FC = () => {
                 
                 <button
                   type="submit"
-                  disabled={isLoading || !input.trim()}
+                  disabled={isLoading || !input.trim() || (apiKeyError && model === 'gemini-2')}
                   className="absolute right-3 top-3 text-primary hover:text-primary/80 transition-colors disabled:text-muted-foreground"
                 >
                   <Send size={20} />

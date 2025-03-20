@@ -39,13 +39,20 @@ export interface GeminiConfig {
   maxOutputTokens?: number;
 }
 
+export interface GeminiError {
+  isError: true;
+  code: number;
+  message: string;
+  status?: string;
+}
+
 /**
  * Gửi tin nhắn đến API Gemini và nhận phản hồi
  */
 export const sendMessageToGemini = async (
   messageContent: string, 
   config: GeminiConfig = {}
-): Promise<string> => {
+): Promise<string | GeminiError> => {
   try {
     const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
     
@@ -73,8 +80,27 @@ export const sendMessageToGemini = async (
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorData}`);
+      const errorData = await response.json();
+      const errorCode = errorData?.error?.code || response.status;
+      const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
+      const errorStatus = errorData?.error?.status;
+      
+      // Xử lý lỗi quota vượt quá
+      if (errorCode === 429) {
+        return {
+          isError: true,
+          code: 429,
+          message: 'Quota API của Gemini đã hết. Vui lòng thử lại sau hoặc sử dụng một API key khác.',
+          status: errorStatus
+        };
+      }
+      
+      return {
+        isError: true,
+        code: errorCode,
+        message: errorMsg,
+        status: errorStatus
+      };
     }
     
     const data: GeminiResponse = await response.json();
@@ -82,11 +108,19 @@ export const sendMessageToGemini = async (
     if (data.candidates && data.candidates.length > 0 && data.candidates[0].content.parts.length > 0) {
       return data.candidates[0].content.parts[0].text;
     } else {
-      throw new Error('Không nhận được phản hồi hợp lệ từ Gemini API');
+      return {
+        isError: true,
+        code: 0,
+        message: 'Không nhận được phản hồi hợp lệ từ Gemini API'
+      };
     }
   } catch (error) {
     console.error('Lỗi khi gọi Gemini API:', error);
-    throw error;
+    return {
+      isError: true,
+      code: 500,
+      message: error instanceof Error ? error.message : 'Lỗi không xác định khi gọi API'
+    };
   }
 };
 
@@ -95,7 +129,7 @@ export const sendMessageWithSystemInstructions = async (
   messageContent: string,
   systemInstructions: string,
   config: GeminiConfig = {}
-): Promise<string> => {
+): Promise<string | GeminiError> => {
   try {
     const apiUrl = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent';
     
@@ -131,8 +165,27 @@ export const sendMessageWithSystemInstructions = async (
     });
     
     if (!response.ok) {
-      const errorData = await response.text();
-      throw new Error(`Gemini API error: ${response.status} - ${errorData}`);
+      const errorData = await response.json();
+      const errorCode = errorData?.error?.code || response.status;
+      const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
+      const errorStatus = errorData?.error?.status;
+      
+      // Xử lý lỗi quota vượt quá
+      if (errorCode === 429) {
+        return {
+          isError: true,
+          code: 429,
+          message: 'Quota API của Gemini đã hết. Vui lòng thử lại sau hoặc sử dụng một API key khác.',
+          status: errorStatus
+        };
+      }
+      
+      return {
+        isError: true,
+        code: errorCode,
+        message: errorMsg,
+        status: errorStatus
+      };
     }
     
     const data: GeminiResponse = await response.json();
@@ -140,10 +193,18 @@ export const sendMessageWithSystemInstructions = async (
     if (data.candidates && data.candidates.length > 0 && data.candidates[0].content.parts.length > 0) {
       return data.candidates[0].content.parts[0].text;
     } else {
-      throw new Error('Không nhận được phản hồi hợp lệ từ Gemini API');
+      return {
+        isError: true,
+        code: 0,
+        message: 'Không nhận được phản hồi hợp lệ từ Gemini API'
+      };
     }
   } catch (error) {
     console.error('Lỗi khi gọi Gemini API:', error);
-    throw error;
+    return {
+      isError: true,
+      code: 500,
+      message: error instanceof Error ? error.message : 'Lỗi không xác định khi gọi API'
+    };
   }
 };
