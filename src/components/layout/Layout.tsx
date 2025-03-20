@@ -12,9 +12,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isHomePage = location.pathname === '/';
   
   return (
-    <div className="flex min-h-screen">
+    <div className="flex flex-col min-h-screen">
       {!isHomePage && <Sidebar />}
-      <main className={`flex-1 transition-all duration-300 animate-fade-in ${isHomePage ? 'w-full' : 'w-[calc(100%-280px)]'}`}>
+      <main className={`flex-1 transition-all duration-300 animate-fade-in ${isHomePage ? '' : 'pt-16'}`}>
         {children}
       </main>
     </div>

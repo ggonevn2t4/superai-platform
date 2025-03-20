@@ -16,20 +16,20 @@ const Sidebar: React.FC = () => {
   ];
   
   return (
-    <div className="w-[280px] h-screen overflow-y-auto border-r bg-sidebar border-sidebar-border fixed left-0 top-0 z-10 shadow-sm animate-slide-in-left">
-      <div className="flex flex-col h-full">
-        <div className="p-6">
-          <Link to="/" className="flex items-center gap-2 mb-6">
+    <div className="w-full bg-sidebar border-b border-sidebar-border fixed top-0 left-0 z-10 shadow-sm">
+      <div className="container mx-auto px-4">
+        <div className="flex items-center h-16">
+          <Link to="/" className="flex items-center gap-2 mr-8">
             <Bot size={24} className="text-primary" />
             <span className="font-semibold text-xl">SuperAI</span>
           </Link>
           
-          <nav className="space-y-1">
+          <nav className="flex items-center space-x-1 overflow-x-auto scrollbar-none">
             {navItems.map((item, index) => (
               <Link
                 key={index}
                 to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${
                   location.pathname === item.path
                     ? 'bg-sidebar-accent text-sidebar-primary font-medium'
                     : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
@@ -40,16 +40,12 @@ const Sidebar: React.FC = () => {
               </Link>
             ))}
           </nav>
-        </div>
-        
-        <div className="mt-auto p-6">
-          <div className="glass rounded-xl p-4 flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
-              <span className="text-sm font-medium">S</span>
-            </div>
-            <div>
-              <p className="text-sm font-medium">SuperAI</p>
-              <p className="text-xs text-muted-foreground">Nền tảng AI toàn diện</p>
+          
+          <div className="ml-auto hidden md:flex items-center">
+            <div className="flex items-center gap-3">
+              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
+                <span className="text-sm font-medium">S</span>
+              </div>
             </div>
           </div>
         </div>
