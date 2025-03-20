@@ -10,6 +10,73 @@ import ChatMessages from './ChatMessages';
 
 const STORAGE_KEY = 'superai_chat_history';
 
+const generateSuggestedQuestions = (content: string): string[] => {
+  const topics: {[key: string]: string[]} = {
+    'ai': [
+      'Trí tuệ nhân tạo sẽ phát triển như thế nào trong tương lai?',
+      'Làm cách nào AI có thể hỗ trợ trong công việc hàng ngày?',
+      'So sánh các mô hình AI hiện đại nhất hiện nay?'
+    ],
+    'programming': [
+      'Ngôn ngữ lập trình nào phù hợp nhất cho người mới bắt đầu?',
+      'Làm thế nào để tối ưu hóa hiệu suất của ứng dụng?',
+      'Xu hướng lập trình nào đang phổ biến nhất hiện nay?'
+    ],
+    'data': [
+      'Phân tích dữ liệu lớn mang lại lợi ích gì?',
+      'Các công cụ trực quan hóa dữ liệu tốt nhất hiện nay?',
+      'Làm thế nào để đảm bảo bảo mật dữ liệu cá nhân?'
+    ],
+    'web': [
+      'Các framework front-end phổ biến nhất hiện nay?',
+      'Làm thế nào để tối ưu SEO cho website?',
+      'Xu hướng thiết kế web nào đang được ưa chuộng?'
+    ],
+    'mobile': [
+      'So sánh phát triển ứng dụng native và cross-platform?',
+      'Các công cụ thiết kế UI/UX cho ứng dụng di động?',
+      'Làm thế nào để tăng lượt tải ứng dụng trên app store?'
+    ]
+  };
+
+  const lowerContent = content.toLowerCase();
+  const relatedTopics: string[] = [];
+  
+  if (lowerContent.includes('ai') || lowerContent.includes('trí tuệ') || lowerContent.includes('mô hình')) {
+    relatedTopics.push('ai');
+  }
+  
+  if (lowerContent.includes('code') || lowerContent.includes('lập trình') || lowerContent.includes('developer')) {
+    relatedTopics.push('programming');
+  }
+  
+  if (lowerContent.includes('dữ liệu') || lowerContent.includes('data') || lowerContent.includes('thông tin')) {
+    relatedTopics.push('data');
+  }
+  
+  if (lowerContent.includes('web') || lowerContent.includes('trang') || lowerContent.includes('website')) {
+    relatedTopics.push('web');
+  }
+  
+  if (lowerContent.includes('di động') || lowerContent.includes('điện thoại') || lowerContent.includes('app')) {
+    relatedTopics.push('mobile');
+  }
+  
+  if (relatedTopics.length === 0) {
+    relatedTopics.push('ai', 'programming', 'web');
+  }
+  
+  let allQuestions: string[] = [];
+  relatedTopics.forEach(topic => {
+    if (topics[topic]) {
+      allQuestions = [...allQuestions, ...topics[topic]];
+    }
+  });
+  
+  const shuffled = allQuestions.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3);
+};
+
 const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(() => {
     const savedMessages = localStorage.getItem(STORAGE_KEY);
@@ -19,7 +86,12 @@ const ChatInterface: React.FC = () => {
         id: '1',
         role: 'assistant',
         content: 'Xin chào! Tôi là SuperAI, trợ lý AI toàn diện. Tôi có thể giúp gì cho bạn hôm nay?',
-        timestamp: new Date()
+        timestamp: new Date(),
+        suggestedQuestions: [
+          'Bạn có thể giúp tôi học lập trình không?',
+          'Giải thích về trí tuệ nhân tạo là gì?',
+          'Các xu hướng công nghệ mới nhất hiện nay?'
+        ]
       }];
   });
   
@@ -94,11 +166,14 @@ const ChatInterface: React.FC = () => {
           response = response.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '[Liên kết đã bị lọc]');
         }
         
+        const suggestedQuestions = generateSuggestedQuestions(response);
+        
         const assistantMessage: Message = {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content: response,
-          timestamp: new Date()
+          timestamp: new Date(),
+          suggestedQuestions: suggestedQuestions
         };
         
         setMessages(prev => [...prev, assistantMessage]);
@@ -192,6 +267,14 @@ const ChatInterface: React.FC = () => {
     );
   };
   
+  const handleSelectSuggestedQuestion = (question: string) => {
+    setInput(question);
+    // Optional: auto-submit the question
+    // setTimeout(() => {
+    //   handleSubmit(new Event('submit') as React.FormEvent);
+    // }, 100);
+  };
+  
   return (
     <div className="relative flex flex-col h-screen">
       <div className="absolute bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-sm">
@@ -236,6 +319,7 @@ const ChatInterface: React.FC = () => {
         <ChatMessages 
           messages={messages}
           onMessageFeedback={handleMessageFeedback}
+          onSelectSuggestedQuestion={handleSelectSuggestedQuestion}
         />
       </div>
     </div>

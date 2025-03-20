@@ -5,9 +5,14 @@ import ChatMessage, { Message } from './ChatMessage';
 interface ChatMessagesProps {
   messages: Message[];
   onMessageFeedback: (messageId: string, type: 'positive' | 'negative') => void;
+  onSelectSuggestedQuestion?: (question: string) => void;
 }
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, onMessageFeedback }) => {
+const ChatMessages: React.FC<ChatMessagesProps> = ({ 
+  messages, 
+  onMessageFeedback,
+  onSelectSuggestedQuestion
+}) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -21,6 +26,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({ messages, onMessageFeedback
           key={message.id} 
           message={message} 
           onFeedback={onMessageFeedback}
+          onSelectSuggestedQuestion={onSelectSuggestedQuestion}
         />
       ))}
       <div ref={messagesEndRef} />
