@@ -11,18 +11,19 @@ interface Model {
 
 interface ModelSelectorProps {
   onChange?: (modelId: string) => void;
+  defaultModel?: string;
 }
 
 const models: Model[] = [
   { 
-    id: 'gpt-4o', 
-    name: 'GPT-4o', 
-    description: 'Mô hình mạnh mẽ nhất của OpenAI' 
-  },
-  { 
     id: 'gemini-2', 
     name: 'Gemini 1.5 Pro', 
     description: 'Mô hình tiên tiến nhất từ Google' 
+  },
+  { 
+    id: 'gpt-4o', 
+    name: 'GPT-4o', 
+    description: 'Mô hình mạnh mẽ nhất của OpenAI' 
   },
   { 
     id: 'claude-3-7', 
@@ -36,9 +37,12 @@ const models: Model[] = [
   },
 ];
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 'gemini-2' }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<Model>(models[0]);
+  const [selectedModel, setSelectedModel] = useState<Model>(() => {
+    const defaultModelObj = models.find(model => model.id === defaultModel) || models[0];
+    return defaultModelObj;
+  });
   
   const handleSelect = (model: Model) => {
     setSelectedModel(model);

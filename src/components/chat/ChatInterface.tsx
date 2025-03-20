@@ -256,7 +256,7 @@ const ChatInterface: React.FC = () => {
         <div className="container mx-auto max-w-4xl px-4 py-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 flex-wrap">
-              <ModelSelector onChange={setModel} />
+              <ModelSelector onChange={setModel} defaultModel="gemini-2" />
               
               <button
                 onClick={clearChat}
