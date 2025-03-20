@@ -60,6 +60,27 @@ const getNextApiKey = () => {
 };
 
 /**
+ * Ensures that error code is always a number
+ */
+const getErrorCode = (errorData: any, defaultCode: number): number => {
+  if (errorData?.error?.code === undefined) {
+    return defaultCode;
+  }
+  
+  if (typeof errorData.error.code === 'number') {
+    return errorData.error.code;
+  }
+  
+  if (typeof errorData.error.code === 'string') {
+    // Try to parse as integer
+    const parsed = parseInt(errorData.error.code, 10);
+    return isNaN(parsed) ? defaultCode : parsed;
+  }
+  
+  return defaultCode;
+};
+
+/**
  * Gửi tin nhắn đến API Gemini và nhận phản hồi với cơ chế thử các API key khác nhau
  */
 export const sendMessageToGemini = async (
@@ -100,11 +121,8 @@ export const sendMessageToGemini = async (
       
       if (!response.ok) {
         const errorData = await response.json();
-        // Fix: Ensure errorCode is always a number
-        const errorCode: number = typeof errorData?.error?.code === 'string' 
-          ? parseInt(errorData.error.code, 10) 
-          : (errorData?.error?.code || response.status);
-          
+        // Use our helper function to ensure errorCode is a number
+        const errorCode = getErrorCode(errorData, response.status);
         const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
         const errorStatus = errorData?.error?.status;
         
@@ -206,11 +224,8 @@ export const sendMessageWithSystemInstructions = async (
       
       if (!response.ok) {
         const errorData = await response.json();
-        // Fix: Ensure errorCode is always a number using the same approach
-        const errorCode: number = typeof errorData?.error?.code === 'string' 
-          ? parseInt(errorData.error.code, 10) 
-          : (errorData?.error?.code || response.status);
-          
+        // Use the same helper function to ensure errorCode is a number
+        const errorCode = getErrorCode(errorData, response.status);
         const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
         const errorStatus = errorData?.error?.status;
         
