@@ -1,6 +1,5 @@
-
 // API key cho Gemini
-export const GEMINI_API_KEY = 'AIzaSyADttn9GcTn-zMtzZnl_AM4S3i-xCLJLUc';
+export const GEMINI_API_KEY = 'AIzaSyCehIeceHVA3z9EeQcwaK2GfaELT1LeG2Q';
 
 // Interface cho request và response
 export interface GeminiMessage {
