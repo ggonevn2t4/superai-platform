@@ -1,9 +1,9 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Mic, StopCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import ChatMessage, { Message } from './ChatMessage';
 import ModelSelector from '../ui/ModelSelector';
+import { sendMessageToGemini } from '../../services/geminiService';
 
 const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>([
@@ -26,7 +26,7 @@ const ChatInterface: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!input.trim()) return;
@@ -43,18 +43,32 @@ const ChatInterface: React.FC = () => {
     setInput('');
     setIsLoading(true);
     
-    // Simulate AI response after a delay
-    setTimeout(() => {
+    try {
+      // Xử lý tin nhắn dựa trên model được chọn
+      let response: string;
+      
+      if (model === 'gemini-2') {
+        // Sử dụng Gemini API
+        response = await sendMessageToGemini(input);
+      } else {
+        // Cho các model khác, sử dụng phản hồi mẫu
+        response = `Đây là phản hồi mẫu từ mô hình ${model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`;
+      }
+      
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
         role: 'assistant',
-        content: `Đây là phản hồi mẫu từ mô hình ${model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`,
+        content: response,
         timestamp: new Date()
       };
       
       setMessages(prev => [...prev, assistantMessage]);
+    } catch (error) {
+      console.error('Lỗi khi xử lý tin nhắn:', error);
+      toast.error('Đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.');
+    } finally {
       setIsLoading(false);
-    }, 1500);
+    }
   };
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

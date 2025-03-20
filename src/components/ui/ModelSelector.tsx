@@ -20,14 +20,14 @@ const models: Model[] = [
     description: 'Mô hình mạnh mẽ nhất của OpenAI' 
   },
   { 
+    id: 'gemini-2', 
+    name: 'Gemini Flash 2.0', 
+    description: 'Mô hình flash tiên tiến từ Google' 
+  },
+  { 
     id: 'claude-3-7', 
     name: 'Claude 3.7', 
     description: 'Opus - Mô hình tiên tiến của Anthropic' 
-  },
-  { 
-    id: 'gemini-2', 
-    name: 'Gemini 2.0', 
-    description: 'Mô hình mới nhất từ Google' 
   },
   { 
     id: 'mistral-large', 
