@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Bot, BrainCircuit, ArrowRight, Sparkles, CheckCircle2 } from 'lucide-react';
@@ -64,7 +63,6 @@ const Hero: React.FC = () => {
           </div>
         </div>
         
-        {/* Preview Image */}
         <div className="relative mx-auto max-w-5xl animate-fade-in">
           <div className="glass rounded-2xl overflow-hidden shadow-lg border border-white/30 hover:shadow-xl transition-shadow duration-300">
             <div className="bg-sidebar border-b p-4 flex items-center gap-3">
