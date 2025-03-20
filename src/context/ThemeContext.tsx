@@ -39,9 +39,9 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           .from('user_preferences')
           .select('theme')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
-        if (error && error.code !== 'PGRST116') {
+        if (error) {
           console.error('Error loading user preferences:', error);
           return;
         }
@@ -71,7 +71,11 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       const { error } = await supabase
         .from('user_preferences')
         .upsert(
-          { user_id: user.id, theme: newTheme, updated_at: new Date().toISOString() },
+          { 
+            user_id: user.id, 
+            theme: newTheme, 
+            updated_at: new Date().toISOString() 
+          },
           { onConflict: 'user_id' }
         );
 
