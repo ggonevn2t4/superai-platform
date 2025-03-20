@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Bot, User, CheckCheck, Copy, Code, Globe, Download, ThumbsUp, ThumbsDown } from 'lucide-react';
@@ -11,6 +10,7 @@ export interface Message {
   timestamp: Date;
   translated?: string;
   feedback?: 'positive' | 'negative';
+  isError?: boolean;
 }
 
 interface ChatMessageProps {
