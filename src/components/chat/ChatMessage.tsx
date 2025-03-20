@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles, CornerRightDown } from 'lucide-react';
+import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface Message {
@@ -161,24 +161,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             {formatContent(message.content)}
           </div>
           
-          {message.role === 'assistant' && message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
-            <div className="mt-4 space-y-2">
-              <p className="text-sm text-muted-foreground font-medium flex items-center gap-1">
-                <CornerRightDown size={14} /> Câu hỏi liên quan
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {message.suggestedQuestions.map((question, index) => (
-                  <button
-                    key={`suggested-${index}`}
-                    onClick={() => onSelectSuggestedQuestion && onSelectSuggestedQuestion(question)}
-                    className="text-sm px-3 py-1.5 rounded-full bg-accent/50 hover:bg-accent/80 transition-colors text-foreground flex items-center gap-1"
-                  >
-                    {question}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          {/* Removed the suggested questions section */}
           
           {/* Removed the feedback buttons as requested */}
         </div>
