@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RotateCcw, Download, Settings, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Download, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ModelSelector from '../ui/ModelSelector';
 import { Button } from '../ui/button';
@@ -73,17 +73,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
           >
             <Download size={16} />
             <span className="hidden sm:inline">Xuất</span>
-          </Button>
-          
-          <Button
-            onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-            variant={showAdvancedOptions ? "secondary" : "outline"}
-            size="sm"
-            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/80"
-            title="Cài đặt nâng cao"
-          >
-            <Settings size={16} />
-            <span className="hidden sm:inline">Cài đặt</span>
           </Button>
         </div>
         

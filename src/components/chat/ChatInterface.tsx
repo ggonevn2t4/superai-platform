@@ -4,7 +4,6 @@ import { Message } from './ChatMessage';
 import { sendMessageToGemini, GeminiError } from '../../services/geminiService';
 import { sendMessageToDeepSeek, DeepSeekError } from '../../services/deepseekService';
 import ChatHeader from './ChatHeader';
-import ChatSettings from './ChatSettings';
 import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
 
@@ -289,16 +288,6 @@ const ChatInterface: React.FC = () => {
             isLoading={isLoading}
             apiKeyError={apiKeyError}
             apiProvider={apiProvider}
-          />
-          
-          <ChatSettings 
-            showAdvancedOptions={showAdvancedOptions}
-            temperature={temperature}
-            setTemperature={setTemperature}
-            maxTokens={maxTokens}
-            setMaxTokens={setMaxTokens}
-            filterResult={filterResult}
-            setFilterResult={setFilterResult}
           />
           
           <ChatInput 
