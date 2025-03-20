@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Mic, StopCircle, RotateCcw, Settings, Download, Filter } from 'lucide-react';
 import { toast } from 'sonner';
@@ -7,12 +6,12 @@ import ModelSelector from '../ui/ModelSelector';
 import { sendMessageToGemini } from '../../services/geminiService';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
+import { cn } from '@/lib/utils';
 
 const STORAGE_KEY = 'superai_chat_history';
 
 const ChatInterface: React.FC = () => {
   const [messages, setMessages] = useState<Message[]>(() => {
-    // Attempt to load chat history from localStorage
     const savedMessages = localStorage.getItem(STORAGE_KEY);
     return savedMessages 
       ? JSON.parse(savedMessages) 
@@ -39,7 +38,6 @@ const ChatInterface: React.FC = () => {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   
-  // Save messages to localStorage when they change
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   }, [messages]);
@@ -57,7 +55,6 @@ const ChatInterface: React.FC = () => {
     
     if (!input.trim()) return;
     
-    // Add user message
     const userMessage: Message = {
       id: Date.now().toString(),
       role: 'user',
@@ -70,21 +67,17 @@ const ChatInterface: React.FC = () => {
     setIsLoading(true);
     
     try {
-      // Xử lý tin nhắn dựa trên model được chọn
       let response: string;
       
       if (model === 'gemini-2') {
-        // Sử dụng Gemini API với các cài đặt được cấu hình
         response = await sendMessageToGemini(input, {
           temperature,
           maxOutputTokens: maxTokens
         });
       } else {
-        // Cho các model khác, sử dụng phản hồi mẫu
         response = `Đây là phản hồi mẫu từ mô hình ${model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`;
       }
       
-      // Filter content if enabled (simulated)
       if (filterResult) {
         response = response.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '[Liên kết đã bị lọc]');
       }
@@ -132,7 +125,7 @@ const ChatInterface: React.FC = () => {
     const reader = new FileReader();
     reader.onload = (event) => {
       if (event.target?.result) {
-        const fileContent = event.target.result.toString().slice(0, 2000); // Limit preview to 2000 chars
+        const fileContent = event.target.result.toString().slice(0, 2000);
         setInput(prev => `${prev}\n\nNội dung tệp "${file.name}":\n${fileContent}${fileContent.length >= 2000 ? '...' : ''}`);
         toast.success(`Đã tải lên tệp ${file.name}`);
       }
@@ -152,8 +145,6 @@ const ChatInterface: React.FC = () => {
     if (isRecording) {
       setIsRecording(false);
       toast.success('Đã dừng ghi âm giọng nói.');
-      // In a real implementation, speech would be converted to text
-      setInput(prev => `${prev} [Nội dung ghi âm giọng nói sẽ xuất hiện ở đây]`);
     } else {
       setIsRecording(true);
       toast.info('Đang ghi âm giọng nói của bạn...');
