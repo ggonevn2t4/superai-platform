@@ -100,7 +100,8 @@ export const sendMessageToGemini = async (
       
       if (!response.ok) {
         const errorData = await response.json();
-        const errorCode = errorData?.error?.code || response.status;
+        // Fix 1: Ensure errorCode is a number
+        const errorCode = errorData?.error?.code ? Number(errorData.error.code) : response.status;
         const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
         const errorStatus = errorData?.error?.status;
         
@@ -202,7 +203,8 @@ export const sendMessageWithSystemInstructions = async (
       
       if (!response.ok) {
         const errorData = await response.json();
-        const errorCode = errorData?.error?.code || response.status;
+        // Fix 2: Ensure errorCode is a number
+        const errorCode = errorData?.error?.code ? Number(errorData.error.code) : response.status;
         const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
         const errorStatus = errorData?.error?.status;
         
