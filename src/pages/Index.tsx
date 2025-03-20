@@ -2,10 +2,21 @@
 import React from 'react';
 import Hero from '../components/home/Hero';
 import Features from '../components/home/Features';
-import { Bot, ArrowRight, Sparkles, Github } from 'lucide-react';
+import { Bot, ArrowRight, Sparkles, Github, LogIn, LogOut, User } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '@/context/AuthContext';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const Index: React.FC = () => {
+  const { user, signOut } = useAuth();
+
   return (
     <div className="min-h-screen bg-background">
       <header className="py-6 px-8 flex justify-between items-center bg-white/80 backdrop-blur-sm sticky top-0 z-50 border-b border-gray-100">
@@ -28,12 +39,50 @@ const Index: React.FC = () => {
           </a>
         </nav>
         
-        <Link
-          to="/chat"
-          className="bg-primary text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 shadow-sm hover:shadow-md transition-all button-effect group"
-        >
-          Bắt đầu <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </Link>
+        {user ? (
+          <div className="flex items-center gap-4">
+            <Link
+              to="/chat"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 shadow-sm hover:shadow-md transition-all button-effect group"
+            >
+              Trò chuyện <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" size="icon" className="rounded-full">
+                  <User size={20} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem className="text-sm">
+                  <span className="truncate">{user.email}</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => signOut()}>
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Đăng xuất</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+        ) : (
+          <div className="flex items-center gap-4">
+            <Link
+              to="/auth"
+              className="text-muted-foreground hover:text-primary transition-colors font-medium flex items-center gap-2"
+            >
+              <LogIn size={16} /> Đăng nhập
+            </Link>
+            
+            <Link
+              to="/chat"
+              className="bg-primary text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 shadow-sm hover:shadow-md transition-all button-effect group"
+            >
+              Bắt đầu <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+          </div>
+        )}
       </header>
       
       <main>

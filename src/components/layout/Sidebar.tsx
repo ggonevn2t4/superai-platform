@@ -1,10 +1,20 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare } from 'lucide-react';
+import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from '@/components/ui/button';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const { user, signOut } = useAuth();
   
   const navItems = [
     { icon: <MessageSquare size={20} />, label: 'Chat', path: '/chat' },
@@ -42,11 +52,29 @@ const Sidebar: React.FC = () => {
           </nav>
           
           <div className="ml-auto hidden md:flex items-center">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
-                <span className="text-sm font-medium">S</span>
-              </div>
-            </div>
+            {user && (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 gap-2">
+                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
+                      <span className="text-sm font-medium">{user.email?.charAt(0).toUpperCase() || 'U'}</span>
+                    </div>
+                    <span className="hidden md:inline-block text-sm">{user.email?.split('@')[0]}</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem className="text-sm">
+                    <User className="mr-2 h-4 w-4" />
+                    <span className="truncate">{user.email}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => signOut()}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Đăng xuất</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
           </div>
         </div>
       </div>
