@@ -1,8 +1,9 @@
 
 import React, { useRef, useEffect } from 'react';
-import { Send, Paperclip, Mic, StopCircle } from 'lucide-react';
+import { Send, Paperclip, Mic, StopCircle, ArrowUp } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface ChatInputProps {
   input: string;
@@ -62,7 +63,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
     reader.onload = (event) => {
       if (event.target?.result) {
         const fileContent = event.target.result.toString().slice(0, 2000);
-        // Fix: Create the new string first, then set it
+        // Create the new string first, then set it
         const newValue = `${input}\n\nNội dung tệp "${file.name}":\n${fileContent}${fileContent.length >= 2000 ? '...' : ''}`;
         setInput(newValue);
         toast.success(`Đã tải lên tệp ${file.name}`);
@@ -93,13 +94,13 @@ const ChatInput: React.FC<ChatInputProps> = ({
         <button
           type="button"
           onClick={() => fileInputRef.current?.click()}
-          className="p-3 rounded-lg border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors"
+          className="p-3 rounded-lg border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors hover:shadow-sm"
           title="Tải lên tệp"
         >
           <Paperclip size={20} />
         </button>
         
-        <div className="flex-1 relative">
+        <div className="flex-1 relative glass">
           <Textarea
             ref={textareaRef}
             value={input}
@@ -108,29 +109,42 @@ const ChatInput: React.FC<ChatInputProps> = ({
             }}
             onKeyDown={handleKeyDown}
             placeholder={apiKeyError ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
-            className="w-full pl-4 pr-12 py-3 h-12 max-h-[200px] rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
+            className="w-full pl-4 pr-14 py-3 h-12 max-h-[200px] rounded-xl border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
             disabled={isLoading}
             rows={1}
           />
           
-          <div className="absolute right-24 top-3 text-xs text-muted-foreground">
+          <div className="absolute right-24 top-3 text-xs text-muted-foreground font-medium">
             {charCount > 0 && `${charCount} ký tự`}
           </div>
           
           <button 
             type="button" 
             onClick={toggleRecording}
-            className="absolute right-14 top-3 text-muted-foreground hover:text-foreground transition-colors"
+            className={cn(
+              "absolute right-14 top-3 p-1 rounded-full transition-colors",
+              isRecording 
+                ? "bg-red-100 text-red-600 animate-pulse" 
+                : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
+            )}
+            title={isRecording ? "Dừng ghi âm" : "Ghi âm giọng nói"}
           >
-            {isRecording ? <StopCircle size={20} className="text-red-500" /> : <Mic size={20} />}
+            {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
           </button>
           
           <button
             type="submit"
             disabled={isLoading || !input.trim() || (apiKeyError && model === 'gemini-2')}
-            className="absolute right-3 top-3 text-primary hover:text-primary/80 transition-colors disabled:text-muted-foreground"
+            className={cn(
+              "absolute right-3 top-2 p-1.5 rounded-full transition-all",
+              input.trim() 
+                ? "bg-primary text-white hover:bg-primary/90" 
+                : "bg-muted text-muted-foreground",
+              "disabled:bg-muted disabled:text-muted-foreground"
+            )}
+            title="Gửi tin nhắn"
           >
-            <Send size={20} />
+            <ArrowUp size={16} />
           </button>
         </div>
       </div>
