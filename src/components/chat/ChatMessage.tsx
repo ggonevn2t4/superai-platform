@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles, CornerRightDown, ThumbsUp, ThumbsDown } from 'lucide-react';
+import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles, CornerRightDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface Message {
@@ -114,13 +114,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     );
   };
   
-  const giveFeedback = (type: 'positive' | 'negative') => {
-    if (onFeedback) {
-      onFeedback(message.id, type);
-      toast.success('Cảm ơn bạn đã gửi phản hồi!');
-    }
-  };
-  
   return (
     <div 
       className={cn(
@@ -187,35 +180,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           )}
           
-          {message.role === 'assistant' && (
-            <div className="flex gap-2 mt-2">
-              <button
-                onClick={() => giveFeedback('positive')}
-                className={cn(
-                  "text-sm flex items-center gap-1 px-2 py-1 rounded-md transition-colors",
-                  message.feedback === 'positive' 
-                    ? "bg-green-100 text-green-800" 
-                    : "text-muted-foreground hover:bg-accent/50"
-                )}
-                disabled={message.feedback === 'negative'}
-              >
-                <ThumbsUp size={14} /> Hữu ích
-              </button>
-              
-              <button
-                onClick={() => giveFeedback('negative')}
-                className={cn(
-                  "text-sm flex items-center gap-1 px-2 py-1 rounded-md transition-colors",
-                  message.feedback === 'negative' 
-                    ? "bg-red-100 text-red-800" 
-                    : "text-muted-foreground hover:bg-accent/50"
-                )}
-                disabled={message.feedback === 'positive'}
-              >
-                <ThumbsDown size={14} /> Không hữu ích
-              </button>
-            </div>
-          )}
+          {/* Removed the feedback buttons as requested */}
         </div>
         
         <div className="flex-shrink-0">
