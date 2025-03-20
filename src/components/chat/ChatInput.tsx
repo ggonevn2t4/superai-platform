@@ -62,7 +62,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
     reader.onload = (event) => {
       if (event.target?.result) {
         const fileContent = event.target.result.toString().slice(0, 2000);
-        setInput(prev => `${prev}\n\nNội dung tệp "${file.name}":\n${fileContent}${fileContent.length >= 2000 ? '...' : ''}`);
+        // Fix: Create the new string first, then set it
+        const newValue = `${input}\n\nNội dung tệp "${file.name}":\n${fileContent}${fileContent.length >= 2000 ? '...' : ''}`;
+        setInput(newValue);
         toast.success(`Đã tải lên tệp ${file.name}`);
       }
     };
