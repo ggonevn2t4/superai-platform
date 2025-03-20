@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
@@ -400,7 +399,6 @@ export const useChatState = (shareId?: string): [ChatState, ChatActions] => {
   const toggleRecording = () => {
     if (isRecording) {
       setIsRecording(false);
-      toast.success('Đã dừng ghi âm giọng nói.');
     } else {
       setIsRecording(true);
       toast.info('Đang ghi âm giọng nói của bạn...');

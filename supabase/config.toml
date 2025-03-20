@@ -1,1 +1,15 @@
+
 project_id = "mopvfocrrymeixagwmmh"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[functions]
+[functions.analyze-image]
+verify_jwt = false
+[functions.text-to-speech]
+verify_jwt = false
+[functions.speech-to-text]
+verify_jwt = false
