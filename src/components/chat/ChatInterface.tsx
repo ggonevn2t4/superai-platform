@@ -1,11 +1,18 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Message } from './ChatMessage';
 import { sendMessageToGemini, GeminiError } from '../../services/geminiService';
 import { sendMessageToDeepSeek, DeepSeekError } from '../../services/deepseekService';
+import { useAuth } from '@/context/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useParams, useNavigate } from 'react-router-dom';
 import ChatHeader from './ChatHeader';
 import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
+import { Share2, Save } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { v4 as uuidv4 } from 'uuid';
 
 const STORAGE_KEY = 'superai_chat_history';
 
@@ -77,21 +84,33 @@ const generateSuggestedQuestions = (content: string): string[] => {
 };
 
 const ChatInterface: React.FC = () => {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { shareId } = useParams<{ shareId?: string }>();
+  
+  const [conversationId, setConversationId] = useState<string | null>(null);
+  const [conversationTitle, setConversationTitle] = useState<string>('Cuộc trò chuyện mới');
+  const [isShared, setIsShared] = useState<boolean>(false);
+  const [shareLink, setShareLink] = useState<string>('');
+  
   const [messages, setMessages] = useState<Message[]>(() => {
-    const savedMessages = localStorage.getItem(STORAGE_KEY);
-    return savedMessages 
-      ? JSON.parse(savedMessages) 
-      : [{
-        id: '1',
-        role: 'assistant',
-        content: 'Xin chào! Tôi là SuperAI, trợ lý AI toàn diện. Tôi có thể giúp gì cho bạn hôm nay?',
-        timestamp: new Date(),
-        suggestedQuestions: [
-          'Bạn có thể giúp tôi học lập trình không?',
-          'Giải thích về trí tuệ nhân tạo là gì?',
-          'Các xu hướng công nghệ mới nhất hiện nay?'
-        ]
-      }];
+    if (!shareId) {
+      const savedMessages = localStorage.getItem(STORAGE_KEY);
+      return savedMessages 
+        ? JSON.parse(savedMessages) 
+        : [{
+          id: '1',
+          role: 'assistant',
+          content: 'Xin chào! Tôi là SuperAI, trợ lý AI toàn diện. Tôi có thể giúp gì cho bạn hôm nay?',
+          timestamp: new Date(),
+          suggestedQuestions: [
+            'Bạn có thể giúp tôi học lập trình không?',
+            'Giải thích về trí tuệ nhân tạo là gì?',
+            'Các xu hướng công nghệ mới nhất hiện nay?'
+          ]
+        }];
+    }
+    return [];
   });
   
   const [input, setInput] = useState('');
@@ -108,9 +127,217 @@ const ChatInterface: React.FC = () => {
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
+  // Load shared conversation if shareId is provided
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
-  }, [messages]);
+    if (shareId) {
+      fetchSharedConversation(shareId);
+    }
+  }, [shareId]);
+  
+  const fetchSharedConversation = async (id: string) => {
+    try {
+      setIsLoading(true);
+      
+      // Fetch conversation by share_id
+      const { data: conversationData, error: conversationError } = await supabase
+        .from('conversations')
+        .select('*')
+        .eq('share_id', id)
+        .eq('is_shared', true)
+        .single();
+      
+      if (conversationError) throw conversationError;
+      
+      if (conversationData) {
+        setConversationId(conversationData.id);
+        setConversationTitle(conversationData.title);
+        setIsShared(true);
+        setModel(conversationData.model);
+        
+        // Fetch messages for this conversation
+        const { data: messagesData, error: messagesError } = await supabase
+          .from('messages')
+          .select('*')
+          .eq('conversation_id', conversationData.id)
+          .order('timestamp', { ascending: true });
+        
+        if (messagesError) throw messagesError;
+        
+        if (messagesData && messagesData.length > 0) {
+          const formattedMessages = messagesData.map(msg => ({
+            id: msg.id,
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+            timestamp: new Date(msg.timestamp),
+            feedback: msg.feedback as 'positive' | 'negative' | undefined
+          }));
+          
+          setMessages(formattedMessages);
+        }
+      } else {
+        toast.error('Cuộc trò chuyện không tồn tại hoặc không được chia sẻ');
+        navigate('/chat');
+      }
+    } catch (error) {
+      console.error('Error fetching shared conversation:', error);
+      toast.error('Không thể tải cuộc trò chuyện được chia sẻ');
+      navigate('/chat');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
+  // Create new conversation in database
+  const createConversation = async () => {
+    if (!user) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .insert({
+          user_id: user.id,
+          title: conversationTitle || 'Cuộc trò chuyện mới',
+          model: model
+        })
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      setConversationId(data.id);
+      
+      // Also insert the initial assistant message
+      if (messages.length > 0 && messages[0].role === 'assistant') {
+        await supabase
+          .from('messages')
+          .insert({
+            conversation_id: data.id,
+            role: messages[0].role,
+            content: messages[0].content,
+            timestamp: messages[0].timestamp
+          });
+      }
+      
+      toast.success('Cuộc trò chuyện mới đã được tạo');
+      return data.id;
+    } catch (error) {
+      console.error('Error creating conversation:', error);
+      toast.error('Không thể tạo cuộc trò chuyện mới');
+      return null;
+    }
+  };
+  
+  // Save message to database
+  const saveMessageToDatabase = async (message: Message, convId: string) => {
+    if (!user) return;
+    
+    try {
+      await supabase
+        .from('messages')
+        .insert({
+          conversation_id: convId,
+          role: message.role,
+          content: message.content,
+          timestamp: message.timestamp,
+          feedback: message.feedback
+        });
+    } catch (error) {
+      console.error('Error saving message:', error);
+    }
+  };
+  
+  // Update conversation title
+  const updateConversationTitle = async (title: string) => {
+    if (!user || !conversationId) return;
+    
+    try {
+      await supabase
+        .from('conversations')
+        .update({ title: title, updated_at: new Date() })
+        .eq('id', conversationId);
+      
+      setConversationTitle(title);
+    } catch (error) {
+      console.error('Error updating conversation title:', error);
+    }
+  };
+  
+  // Toggle sharing status
+  const toggleSharing = async () => {
+    if (!user || !conversationId) {
+      toast.error('Vui lòng lưu cuộc trò chuyện trước khi chia sẻ');
+      return;
+    }
+    
+    try {
+      const { data, error } = await supabase
+        .from('conversations')
+        .update({ is_shared: !isShared, updated_at: new Date() })
+        .eq('id', conversationId)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      
+      setIsShared(data.is_shared);
+      
+      if (data.is_shared) {
+        const shareUrl = `${window.location.origin}/chat/share/${data.share_id}`;
+        setShareLink(shareUrl);
+        navigator.clipboard.writeText(shareUrl);
+        toast.success('Liên kết chia sẻ đã được sao chép vào clipboard!');
+      } else {
+        setShareLink('');
+        toast.success('Đã tắt chia sẻ cuộc trò chuyện');
+      }
+    } catch (error) {
+      console.error('Error toggling sharing status:', error);
+      toast.error('Không thể thay đổi trạng thái chia sẻ');
+    }
+  };
+  
+  // Save current conversation
+  const saveConversation = async () => {
+    if (!user) {
+      toast.error('Vui lòng đăng nhập để lưu cuộc trò chuyện');
+      return;
+    }
+    
+    if (messages.length <= 1) {
+      toast.error('Chưa có cuộc trò chuyện để lưu');
+      return;
+    }
+    
+    try {
+      let currentConversationId = conversationId;
+      
+      if (!currentConversationId) {
+        // Create new conversation
+        currentConversationId = await createConversation();
+        if (!currentConversationId) return;
+      }
+      
+      // Only save messages that aren't already in the database (have uuid as id)
+      const newMessages = messages.filter(msg => 
+        typeof msg.id === 'string' && msg.id.includes('-')
+      );
+      
+      for (const message of newMessages) {
+        await saveMessageToDatabase(message, currentConversationId);
+      }
+      
+      toast.success('Cuộc trò chuyện đã được lưu!');
+    } catch (error) {
+      console.error('Error saving conversation:', error);
+      toast.error('Không thể lưu cuộc trò chuyện');
+    }
+  };
+  
+  useEffect(() => {
+    if (!shareId) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
+    }
+  }, [messages, shareId]);
   
   useEffect(() => {
     setCharCount(input.length);
@@ -132,7 +359,7 @@ const ChatInterface: React.FC = () => {
     if (!input.trim()) return;
     
     const userMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       role: 'user',
       content: input,
       timestamp: new Date()
@@ -168,7 +395,7 @@ const ChatInterface: React.FC = () => {
         const suggestedQuestions = generateSuggestedQuestions(response);
         
         const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
+          id: uuidv4(),
           role: 'assistant',
           content: response,
           timestamp: new Date(),
@@ -176,6 +403,18 @@ const ChatInterface: React.FC = () => {
         };
         
         setMessages(prev => [...prev, assistantMessage]);
+        
+        // If conversation is already saved, save this message pair too
+        if (conversationId && user) {
+          await saveMessageToDatabase(userMessage, conversationId);
+          await saveMessageToDatabase(assistantMessage, conversationId);
+          
+          // Update the conversation's updated_at timestamp
+          await supabase
+            .from('conversations')
+            .update({ updated_at: new Date() })
+            .eq('id', conversationId);
+        }
       } else {
         if (response.code === 429) {
           setApiKeyError(true);
@@ -189,7 +428,7 @@ const ChatInterface: React.FC = () => {
         }
         
         const errorMessage: Message = {
-          id: (Date.now() + 1).toString(),
+          id: uuidv4(),
           role: 'assistant',
           content: `❌ **Lỗi:** ${response.message}`,
           timestamp: new Date(),
@@ -203,7 +442,7 @@ const ChatInterface: React.FC = () => {
       toast.error('Đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.');
       
       const errorMessage: Message = {
-        id: (Date.now() + 1).toString(),
+        id: uuidv4(),
         role: 'assistant',
         content: '❌ **Lỗi:** Đã xảy ra lỗi khi xử lý tin nhắn của bạn. Vui lòng thử lại sau.',
         timestamp: new Date(),
@@ -228,13 +467,22 @@ const ChatInterface: React.FC = () => {
   
   const clearChat = () => {
     const initialMessage: Message = {
-      id: Date.now().toString(),
+      id: uuidv4(),
       role: 'assistant',
       content: 'Xin chào! Tôi là SuperAI, trợ lý AI toàn diện. Tôi có thể giúp gì cho bạn hôm nay?',
-      timestamp: new Date()
+      timestamp: new Date(),
+      suggestedQuestions: [
+        'Bạn có thể giúp tôi học lập trình không?',
+        'Giải thích về trí tuệ nhân tạo là gì?',
+        'Các xu hướng công nghệ mới nhất hiện nay?'
+      ]
     };
     
     setMessages([initialMessage]);
+    setConversationId(null);
+    setConversationTitle('Cuộc trò chuyện mới');
+    setIsShared(false);
+    setShareLink('');
     toast.success('Đã xóa lịch sử trò chuyện.');
   };
   
@@ -256,7 +504,7 @@ const ChatInterface: React.FC = () => {
     toast.success('Lịch sử trò chuyện đã được xuất ra tệp.');
   };
   
-  const handleMessageFeedback = (messageId: string, type: 'positive' | 'negative') => {
+  const handleMessageFeedback = async (messageId: string, type: 'positive' | 'negative') => {
     setMessages(prevMessages => 
       prevMessages.map(msg => 
         msg.id === messageId 
@@ -264,18 +512,75 @@ const ChatInterface: React.FC = () => {
           : msg
       )
     );
+    
+    // Update feedback in database if this message is stored
+    if (conversationId && user) {
+      try {
+        await supabase
+          .from('messages')
+          .update({ feedback: type })
+          .eq('id', messageId);
+      } catch (error) {
+        console.error('Error updating message feedback:', error);
+      }
+    }
   };
   
   const handleSelectSuggestedQuestion = (question: string) => {
     setInput(question);
-    // Optional: auto-submit the question
-    // setTimeout(() => {
-    //   handleSubmit(new Event('submit') as React.FormEvent);
-    // }, 100);
   };
+  
+  const isReadOnly = !!shareId && !user;
   
   return (
     <div className="relative flex flex-col h-screen">
+      {shareId && (
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 text-yellow-700">
+          <p className="flex items-center gap-2">
+            <Share2 size={16} />
+            {isShared ? 'Bạn đang xem một cuộc trò chuyện được chia sẻ' : 'Cuộc trò chuyện này không còn được chia sẻ'}
+          </p>
+        </div>
+      )}
+      
+      {user && !isShared && !shareId && (
+        <div className="border-b bg-accent/20 py-2">
+          <div className="container mx-auto max-w-4xl px-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <input 
+                type="text" 
+                value={conversationTitle}
+                onChange={(e) => setConversationTitle(e.target.value)}
+                onBlur={() => conversationId && updateConversationTitle(conversationTitle)}
+                className="bg-transparent border-none p-1 focus:outline-none focus:ring-1 focus:ring-primary rounded"
+                placeholder="Tiêu đề cuộc trò chuyện"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <Button
+                onClick={saveConversation}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5"
+              >
+                <Save size={16} />
+                <span>{conversationId ? 'Đã lưu' : 'Lưu'}</span>
+              </Button>
+              
+              <Button
+                onClick={toggleSharing}
+                variant={isShared ? "default" : "outline"}
+                size="sm"
+                className="flex items-center gap-1.5"
+              >
+                <Share2 size={16} />
+                <span>{isShared ? 'Đã chia sẻ' : 'Chia sẻ'}</span>
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="absolute bottom-0 left-0 right-0 border-t bg-background/80 backdrop-blur-sm">
         <div className="container mx-auto max-w-4xl px-4 py-4">
           <ChatHeader 
@@ -288,6 +593,7 @@ const ChatInterface: React.FC = () => {
             isLoading={isLoading}
             apiKeyError={apiKeyError}
             apiProvider={apiProvider}
+            isReadOnly={isReadOnly}
           />
           
           <ChatInput 
@@ -300,6 +606,7 @@ const ChatInterface: React.FC = () => {
             toggleRecording={toggleRecording}
             charCount={charCount}
             model={model}
+            isReadOnly={isReadOnly}
           />
         </div>
       </div>

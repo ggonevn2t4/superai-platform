@@ -15,6 +15,7 @@ interface ChatInputProps {
   toggleRecording: () => void;
   charCount: number;
   model: string;
+  isReadOnly?: boolean;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -26,7 +27,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
   isRecording,
   toggleRecording,
   charCount,
-  model
+  model,
+  isReadOnly = false
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -80,6 +82,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
   
+  if (isReadOnly) {
+    return (
+      <div className="bg-muted/30 rounded-lg p-3 text-center text-muted-foreground">
+        Đây là cuộc trò chuyện chỉ xem. Bạn không thể gửi tin nhắn.
+      </div>
+    );
+  }
+  
   return (
     <form onSubmit={handleSubmit} className="relative">
       <div className="flex space-x-2">
@@ -96,6 +106,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
           onClick={() => fileInputRef.current?.click()}
           className="p-3 rounded-lg border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors hover:shadow-sm"
           title="Tải lên tệp"
+          disabled={isLoading}
         >
           <Paperclip size={20} />
         </button>
@@ -128,6 +139,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50"
             )}
             title={isRecording ? "Dừng ghi âm" : "Ghi âm giọng nói"}
+            disabled={isLoading}
           >
             {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
           </button>

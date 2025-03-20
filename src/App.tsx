@@ -11,6 +11,7 @@ import Chat from "./pages/Chat";
 import Auth from "./pages/Auth";
 import Tools from "./pages/Tools";
 import NotFound from "./pages/NotFound";
+import SharedChat from "./pages/SharedChat";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +30,7 @@ const App = () => (
                 <Chat />
               </ProtectedRoute>
             } />
+            <Route path="/chat/share/:shareId" element={<SharedChat />} />
             <Route path="/tools" element={
               <ProtectedRoute>
                 <Tools />

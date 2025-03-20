@@ -15,6 +15,7 @@ interface ChatHeaderProps {
   isLoading: boolean;
   apiKeyError: boolean;
   apiProvider?: 'gemini' | 'deepseek' | 'other';
+  isReadOnly?: boolean;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -26,7 +27,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   setShowAdvancedOptions,
   isLoading,
   apiKeyError,
-  apiProvider = 'deepseek'
+  apiProvider = 'deepseek',
+  isReadOnly = false
 }) => {
   return (
     <>
@@ -51,29 +53,33 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       
       <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <ModelSelector onChange={setModel} defaultModel={model} />
+          <ModelSelector onChange={!isReadOnly ? setModel : () => {}} defaultModel={model} disabled={isReadOnly} />
           
-          <Button
-            onClick={clearChat}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
-            title="Xóa lịch sử trò chuyện"
-          >
-            <RotateCcw size={16} className="text-primary" />
-            <span className="hidden sm:inline">Làm mới</span>
-          </Button>
-          
-          <Button
-            onClick={exportChatHistory}
-            variant="outline"
-            size="sm"
-            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
-            title="Xuất lịch sử trò chuyện"
-          >
-            <Download size={16} className="text-primary" />
-            <span className="hidden sm:inline">Xuất</span>
-          </Button>
+          {!isReadOnly && (
+            <>
+              <Button
+                onClick={clearChat}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
+                title="Xóa lịch sử trò chuyện"
+              >
+                <RotateCcw size={16} className="text-primary" />
+                <span className="hidden sm:inline">Làm mới</span>
+              </Button>
+              
+              <Button
+                onClick={exportChatHistory}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
+                title="Xuất lịch sử trò chuyện"
+              >
+                <Download size={16} className="text-primary" />
+                <span className="hidden sm:inline">Xuất</span>
+              </Button>
+            </>
+          )}
         </div>
         
         <div className="text-sm text-muted-foreground font-medium">
