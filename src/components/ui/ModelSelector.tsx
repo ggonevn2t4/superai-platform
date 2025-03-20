@@ -1,13 +1,13 @@
 
 import React, { useState } from 'react';
-import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu, Zap } from 'lucide-react';
+import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu, Zap, LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Model {
   id: string;
   name: string;
   description: string;
-  icon: React.ElementRef<any>;
+  icon: LucideIcon; // Use LucideIcon type from lucide-react
 }
 
 interface ModelSelectorProps {
@@ -70,7 +70,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 
         type="button"
       >
         <span className="bg-primary/10 p-1 rounded text-primary">
-          <selectedModel.icon size={16} />
+          {/* Render the icon component with proper typing */}
+          {React.createElement(selectedModel.icon, { size: 16 })}
         </span>
         <span className="text-sm font-medium">{selectedModel.name}</span>
         <ChevronDown size={14} className={cn("transition-transform duration-200 text-muted-foreground", isOpen && "rotate-180")} />
@@ -94,7 +95,8 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 
                     "mr-2 h-8 w-8 rounded-full flex items-center justify-center",
                     model.id === selectedModel.id ? "bg-primary text-primary-foreground" : "bg-muted"
                   )}>
-                    <model.icon size={16} />
+                    {/* Render the icon component with proper typing */}
+                    {React.createElement(model.icon, { size: 16 })}
                   </div>
                   <div className="flex flex-col items-start">
                     <span className="font-medium">{model.name}</span>
