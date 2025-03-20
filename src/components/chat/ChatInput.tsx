@@ -1,9 +1,9 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { Send, Paperclip, Mic, StopCircle, ArrowUp, Image, Volume2 } from 'lucide-react';
+import { Send, Paperclip, Mic, StopCircle, ArrowUp, Image } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { analyzeImage, speechToText, textToSpeech } from '@/services/mediaServices';
+import { analyzeImage, speechToText } from '@/services/mediaServices';
 
 interface ChatInputProps {
   input: string;
@@ -36,7 +36,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(null);
   const [audioChunks, setAudioChunks] = useState<Blob[]>([]);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
-  const [isProcessingTTS, setIsProcessingTTS] = useState(false);
   
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -207,29 +206,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
   
-  const handleTextToSpeech = async () => {
-    if (!input.trim() || isProcessingTTS) return;
-    
-    setIsProcessingTTS(true);
-    const loadingToast = toast.loading('Đang chuyển văn bản thành giọng nói...');
-    
-    try {
-      const audioContent = await textToSpeech(input, 'nova');
-      
-      const audio = new Audio(audioContent);
-      audio.play();
-      
-      toast.dismiss(loadingToast);
-      toast.success('Đang phát giọng nói');
-    } catch (error) {
-      console.error('Error converting text to speech:', error);
-      toast.dismiss(loadingToast);
-      toast.error('Lỗi khi chuyển văn bản thành giọng nói. Vui lòng thử lại.');
-    } finally {
-      setIsProcessingTTS(false);
-    }
-  };
-  
   if (isReadOnly) {
     return (
       <div className="bg-muted/30 rounded-lg p-3 text-center text-muted-foreground">
@@ -288,37 +264,21 @@ const ChatInput: React.FC<ChatInputProps> = ({
             }}
             onKeyDown={handleKeyDown}
             placeholder={apiKeyError ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
-            className="w-full pl-4 pr-28 py-3 h-12 max-h-[200px] rounded-xl border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
+            className="w-full pl-4 pr-20 py-3 h-12 max-h-[200px] rounded-xl border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
             disabled={isLoading || isProcessingSpeech}
             rows={1}
           />
           
-          <div className="absolute right-36 top-3 text-xs text-muted-foreground font-medium">
+          <div className="absolute right-14 top-3 text-xs text-muted-foreground font-medium">
             {charCount > 0 && `${charCount} ký tự`}
           </div>
-          
-          <button 
-            type="button" 
-            onClick={handleTextToSpeech}
-            disabled={isLoading || !input.trim() || isProcessingTTS}
-            className={cn(
-              "absolute right-26 top-3 p-1 rounded-full transition-colors",
-              input.trim() && !isProcessingTTS 
-                ? "text-primary hover:bg-primary/10" 
-                : "text-muted-foreground",
-              isProcessingTTS && "animate-pulse"
-            )}
-            title="Chuyển văn bản thành giọng nói"
-          >
-            <Volume2 size={18} />
-          </button>
           
           <button 
             type="button" 
             onClick={handleRecordingToggle}
             disabled={isLoading || isProcessingSpeech}
             className={cn(
-              "absolute right-14 top-3 p-1 rounded-full transition-colors",
+              "absolute right-3 top-3 p-1 rounded-full transition-colors",
               isRecording 
                 ? "bg-red-100 text-red-600 animate-pulse" 
                 : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
@@ -333,7 +293,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
             type="submit"
             disabled={isLoading || !input.trim() || (apiKeyError && model === 'gemini-2') || isProcessingSpeech}
             className={cn(
-              "absolute right-3 top-2 p-1.5 rounded-full transition-all",
+              "absolute right-10 top-2 p-1.5 rounded-full transition-all",
               input.trim() && !isProcessingSpeech
                 ? "bg-primary text-white hover:bg-primary/90" 
                 : "bg-muted text-muted-foreground",

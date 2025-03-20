@@ -33,21 +33,6 @@ export const analyzeImage = async (imageBase64: string): Promise<string> => {
   }
 };
 
-// Text to speech - We don't cache this because it returns audio data
-export const textToSpeech = async (text: string, voice: string = 'alloy'): Promise<string> => {
-  try {
-    const { data, error } = await supabase.functions.invoke('text-to-speech', {
-      body: { text, voice },
-    });
-
-    if (error) throw new Error(error.message);
-    return data.audioContent;
-  } catch (error) {
-    console.error('Error converting text to speech:', error);
-    throw error;
-  }
-};
-
 // Speech to text with caching
 export const speechToText = async (audioBase64: string): Promise<string> => {
   try {

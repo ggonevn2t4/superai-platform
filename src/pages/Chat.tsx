@@ -2,7 +2,7 @@
 import React from 'react';
 import ChatInterface from '../components/chat/ChatInterface';
 import Layout from '../components/layout/Layout';
-import { MessageSquareText, Bot, ImageIcon, Mic, Volume2 } from 'lucide-react';
+import { MessageSquareText, Bot, ImageIcon, Mic } from 'lucide-react';
 
 const Chat: React.FC = () => {
   return (
@@ -25,9 +25,6 @@ const Chat: React.FC = () => {
             </div>
             <div className="inline-flex items-center gap-2 bg-accent/50 px-3 py-1.5 rounded-full text-muted-foreground text-xs">
               <Mic size={14} /> Nhận diện giọng nói
-            </div>
-            <div className="inline-flex items-center gap-2 bg-accent/50 px-3 py-1.5 rounded-full text-muted-foreground text-xs">
-              <Volume2 size={14} /> Chuyển văn bản thành giọng nói
             </div>
           </div>
         </div>
