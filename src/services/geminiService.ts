@@ -1,3 +1,4 @@
+
 // API key cho Gemini
 export const GEMINI_API_KEY = 'AIzaSyCehIeceHVA3z9EeQcwaK2GfaELT1LeG2Q';
 
@@ -46,6 +47,22 @@ export interface GeminiError {
 }
 
 /**
+ * Chuyển đổi mã lỗi từ bất kỳ kiểu dữ liệu nào sang kiểu number
+ */
+const ensureErrorCodeIsNumber = (errorCode: any): number => {
+  if (typeof errorCode === 'number') {
+    return errorCode;
+  }
+  
+  if (typeof errorCode === 'string') {
+    const parsed = parseInt(errorCode, 10);
+    return isNaN(parsed) ? 500 : parsed;
+  }
+  
+  return 500; // Mã lỗi mặc định nếu không xác định được
+};
+
+/**
  * Gửi tin nhắn đến API Gemini và nhận phản hồi
  */
 export const sendMessageToGemini = async (
@@ -80,7 +97,7 @@ export const sendMessageToGemini = async (
     
     if (!response.ok) {
       const errorData = await response.json();
-      const errorCode = errorData?.error?.code || response.status;
+      const errorCode = ensureErrorCodeIsNumber(errorData?.error?.code || response.status);
       const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
       const errorStatus = errorData?.error?.status;
       
@@ -88,7 +105,7 @@ export const sendMessageToGemini = async (
       if (errorCode === 429) {
         return {
           isError: true,
-          code: 429,
+          code: errorCode,
           message: 'Quota API của Gemini đã hết. Vui lòng thử lại sau hoặc sử dụng một API key khác.',
           status: errorStatus
         };
@@ -165,7 +182,7 @@ export const sendMessageWithSystemInstructions = async (
     
     if (!response.ok) {
       const errorData = await response.json();
-      const errorCode = errorData?.error?.code || response.status;
+      const errorCode = ensureErrorCodeIsNumber(errorData?.error?.code || response.status);
       const errorMsg = errorData?.error?.message || 'Lỗi không xác định';
       const errorStatus = errorData?.error?.status;
       
@@ -173,7 +190,7 @@ export const sendMessageWithSystemInstructions = async (
       if (errorCode === 429) {
         return {
           isError: true,
-          code: 429,
+          code: errorCode,
           message: 'Quota API của Gemini đã hết. Vui lòng thử lại sau hoặc sử dụng một API key khác.',
           status: errorStatus
         };
