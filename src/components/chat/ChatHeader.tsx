@@ -31,13 +31,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   return (
     <>
       {apiKeyError && (
-        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 rounded-lg mb-4 animate-fade-in">
+        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg mb-4 animate-fade-in shadow-sm">
           <div className="flex">
             <div className="flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+              <AlertTriangle className="h-5 w-5 text-amber-500" />
             </div>
             <div className="ml-3">
-              <p className="text-sm text-yellow-700">
+              <p className="text-sm text-amber-800 font-medium">
                 {apiProvider === 'gemini' 
                   ? 'Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'
                   : apiProvider === 'deepseek'
@@ -57,10 +57,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             onClick={clearChat}
             variant="outline"
             size="sm"
-            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/80"
+            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
             title="Xóa lịch sử trò chuyện"
           >
-            <RotateCcw size={16} />
+            <RotateCcw size={16} className="text-primary" />
             <span className="hidden sm:inline">Làm mới</span>
           </Button>
           
@@ -68,10 +68,10 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             onClick={exportChatHistory}
             variant="outline"
             size="sm"
-            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/80"
+            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
             title="Xuất lịch sử trò chuyện"
           >
-            <Download size={16} />
+            <Download size={16} className="text-primary" />
             <span className="hidden sm:inline">Xuất</span>
           </Button>
         </div>
