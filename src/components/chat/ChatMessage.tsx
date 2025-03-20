@@ -1,6 +1,7 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Bot, User, CheckCheck, Copy, Globe, Download, ThumbsUp, ThumbsDown, Smile, Heart, Sparkles, CornerRightDown } from 'lucide-react';
+import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles, CornerRightDown, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface Message {
@@ -26,9 +27,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
   onSelectSuggestedQuestion 
 }) => {
   const [copied, setCopied] = useState(false);
-  const [showTranslation, setShowTranslation] = useState(false);
-  const [isTranslating, setIsTranslating] = useState(false);
-  const [translation, setTranslation] = useState(message.translated || '');
   
   const copyToClipboard = () => {
     navigator.clipboard.writeText(message.content);
@@ -37,43 +35,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     toast.success('Nội dung đã được sao chép');
   };
   
-  const translateMessage = async () => {
-    if (translation) {
-      setShowTranslation(!showTranslation);
-      return;
-    }
-    
-    setIsTranslating(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      const translatedText = `[Bản dịch] ${message.content}`;
-      setTranslation(translatedText);
-      setShowTranslation(true);
-    } catch (error) {
-      toast.error('Không thể dịch tin nhắn. Vui lòng thử lại sau.');
-    } finally {
-      setIsTranslating(false);
-    }
-  };
-  
-  const downloadAsText = () => {
-    const element = document.createElement('a');
-    const file = new Blob([message.content], {type: 'text/plain'});
-    element.href = URL.createObjectURL(file);
-    element.download = `message-${message.id}.txt`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
-    toast.success('Tin nhắn đã được tải xuống');
-  };
-  
-  const giveFeedback = (type: 'positive' | 'negative') => {
-    if (onFeedback) {
-      onFeedback(message.id, type);
-      toast.success('Cảm ơn bạn đã gửi phản hồi!');
-    }
-  };
-
   const prettifyContent = (content: string) => {
     let prettified = content.replace(/[#*]/g, '');
     
@@ -142,22 +103,6 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
                   >
                     <Copy size={14} />
                   </button>
-                  <button 
-                    onClick={() => {
-                      const element = document.createElement('a');
-                      const file = new Blob([code], {type: 'text/plain'});
-                      element.href = URL.createObjectURL(file);
-                      element.download = `code-snippet-${index}.${language || 'txt'}`;
-                      document.body.appendChild(element);
-                      element.click();
-                      document.body.removeChild(element);
-                      toast.success('Mã đã được tải xuống');
-                    }} 
-                    className="p-1 rounded-md bg-background/80 text-foreground hover:bg-accent transition-colors"
-                    title="Tải xuống mã"
-                  >
-                    <Download size={14} />
-                  </button>
                 </div>
               </div>
             );
@@ -167,6 +112,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
         })}
       </>
     );
+  };
+  
+  const giveFeedback = (type: 'positive' | 'negative') => {
+    if (onFeedback) {
+      onFeedback(message.id, type);
+      toast.success('Cảm ơn bạn đã gửi phản hồi!');
+    }
   };
   
   return (
@@ -213,13 +165,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           </div>
           
           <div className="text-sm leading-relaxed">
-            {showTranslation ? (
-              <div className="bg-accent/30 p-3 rounded-md">
-                <p className="whitespace-pre-wrap">{translation}</p>
-              </div>
-            ) : (
-              formatContent(message.content)
-            )}
+            {formatContent(message.content)}
           </div>
           
           {message.role === 'assistant' && message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
@@ -241,7 +187,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             </div>
           )}
           
-          {message.role === 'assistant' && !showTranslation && (
+          {message.role === 'assistant' && (
             <div className="flex gap-2 mt-2">
               <button
                 onClick={() => giveFeedback('positive')}
@@ -272,33 +218,13 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
           )}
         </div>
         
-        <div className="flex-shrink-0 flex gap-2">
+        <div className="flex-shrink-0">
           <button 
             onClick={copyToClipboard} 
             className="text-muted-foreground hover:text-foreground p-1.5 rounded transition-colors"
             title="Sao chép nội dung"
           >
             {copied ? <CheckCheck size={16} className="text-green-500" /> : <Copy size={16} />}
-          </button>
-          
-          <button 
-            onClick={translateMessage} 
-            className={cn(
-              "text-muted-foreground hover:text-foreground p-1.5 rounded transition-colors",
-              showTranslation && "text-primary"
-            )}
-            title={showTranslation ? "Hiển thị bản gốc" : "Dịch tin nhắn"}
-            disabled={isTranslating}
-          >
-            <Globe size={16} className={isTranslating ? "animate-spin" : ""} />
-          </button>
-          
-          <button 
-            onClick={downloadAsText} 
-            className="text-muted-foreground hover:text-foreground p-1.5 rounded transition-colors"
-            title="Tải xuống tin nhắn"
-          >
-            <Download size={16} />
           </button>
         </div>
       </div>
