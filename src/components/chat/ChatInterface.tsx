@@ -53,7 +53,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         isReadOnly={readOnly}
       />
       <ChatMessages 
-        messages={messages.filter(msg => msg.role !== 'system')} 
+        messages={messages} 
         onMessageFeedback={handleMessageFeedback}
         onSelectSuggestedQuestion={handleSelectSuggestedQuestion}
       />

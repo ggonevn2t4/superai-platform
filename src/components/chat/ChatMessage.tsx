@@ -6,13 +6,14 @@ import { toast } from 'sonner';
 
 export interface Message {
   id: string;
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
   translated?: string;
   feedback?: 'positive' | 'negative';
   isError?: boolean;
   suggestedQuestions?: string[];
+  pending?: boolean;
 }
 
 interface ChatMessageProps {
@@ -34,6 +35,11 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
     setTimeout(() => setCopied(false), 2000);
     toast.success('Nội dung đã được sao chép');
   };
+  
+  // We shouldn't render system messages, but adding this check for safety
+  if (message.role === 'system') {
+    return null;
+  }
   
   const prettifyContent = (content: string) => {
     let prettified = content.replace(/[#*]/g, '');

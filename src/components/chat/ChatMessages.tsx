@@ -19,9 +19,12 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
+  // Filter out any system messages
+  const displayMessages = messages.filter(message => message.role !== 'system');
+  
   return (
     <div className="py-4 px-4">
-      {messages.map((message) => (
+      {displayMessages.map((message) => (
         <ChatMessage 
           key={message.id} 
           message={message} 
