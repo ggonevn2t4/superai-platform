@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Send, Paperclip, Mic, StopCircle, RotateCcw, Settings, Download, Filter, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
@@ -7,7 +8,6 @@ import { sendMessageToGemini, GeminiError } from '../../services/geminiService';
 import { Button } from '../ui/button';
 import { Textarea } from '../ui/textarea';
 import { cn } from '@/lib/utils';
-import { Alert, AlertTitle, AlertDescription } from '../ui/alert';
 
 const STORAGE_KEY = 'superai_chat_history';
 
@@ -34,7 +34,6 @@ const ChatInterface: React.FC = () => {
   const [maxTokens, setMaxTokens] = useState(2048);
   const [filterResult, setFilterResult] = useState(false);
   const [apiKeyError, setApiKeyError] = useState(false);
-  const [keyAttemptCount, setKeyAttemptCount] = useState(0);
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -53,13 +52,6 @@ const ChatInterface: React.FC = () => {
     setCharCount(input.length);
   }, [input]);
   
-  const handleModelChange = (modelId: string) => {
-    setModel(modelId);
-    if (modelId !== 'gemini-2') {
-      setApiKeyError(false);
-    }
-  };
-  
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -75,6 +67,7 @@ const ChatInterface: React.FC = () => {
     setMessages(prev => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
+    setApiKeyError(false);
     
     try {
       let response: string | GeminiError;
@@ -85,19 +78,10 @@ const ChatInterface: React.FC = () => {
           maxOutputTokens: maxTokens
         });
       } else {
-        const modelNames: Record<string, string> = {
-          'gpt-4o': 'GPT-4o',
-          'claude-3-7': 'Claude 3.7 Opus',
-          'mistral-large': 'Mistral Large'
-        };
-        
-        response = `Đây là phản hồi mẫu từ mô hình ${modelNames[model] || model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`;
+        response = `Đây là phản hồi mẫu từ mô hình ${model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`;
       }
       
       if (typeof response === 'string') {
-        setApiKeyError(false);
-        setKeyAttemptCount(0);
-        
         if (filterResult) {
           response = response.replace(/(?:https?|ftp):\/\/[\n\S]+/g, '[Liên kết đã bị lọc]');
         }
@@ -111,17 +95,10 @@ const ChatInterface: React.FC = () => {
         
         setMessages(prev => [...prev, assistantMessage]);
       } else {
+        // Xử lý các lỗi từ API
         if (response.code === 429) {
           setApiKeyError(true);
-          setKeyAttemptCount(prev => prev + 1);
-          
-          if (keyAttemptCount >= 3) {
-            const newModel = 'gpt-4o';
-            setModel(newModel);
-            toast.error(`Tất cả API key Gemini đã hết quota. Đã tự động chuyển sang model ${newModel}.`);
-          } else {
-            toast.error(response.message);
-          }
+          toast.error('Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key.');
         }
         
         const errorMessage: Message = {
@@ -248,13 +225,18 @@ const ChatInterface: React.FC = () => {
   return (
     <div className="relative flex flex-col h-screen">
       {apiKeyError && (
-        <Alert variant="destructive" className="mx-4 mt-4">
-          <AlertTriangle className="h-5 w-5" />
-          <AlertTitle>Lỗi quota API</AlertTitle>
-          <AlertDescription>
-            Quota API Gemini đã hết. Hệ thống đã thử nhiều API key khác nhau. Hãy thử chọn model khác như GPT-4o hoặc Claude.
-          </AlertDescription>
-        </Alert>
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <AlertTriangle className="h-5 w-5 text-yellow-400" />
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.
+              </p>
+            </div>
+          </div>
+        </div>
       )}
       
       <div className="flex-1 overflow-y-auto pb-32" ref={scrollContainerRef}>
@@ -274,7 +256,7 @@ const ChatInterface: React.FC = () => {
         <div className="container mx-auto max-w-4xl px-4 py-4">
           <div className="flex justify-between items-center mb-4">
             <div className="flex items-center gap-2 flex-wrap">
-              <ModelSelector onChange={handleModelChange} defaultModel="gemini-2" />
+              <ModelSelector onChange={setModel} defaultModel="gemini-2" />
               
               <button
                 onClick={clearChat}
@@ -391,7 +373,7 @@ const ChatInterface: React.FC = () => {
                     adjustTextareaHeight();
                   }}
                   onKeyDown={handleKeyDown}
-                  placeholder={apiKeyError && model === 'gemini-2' ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
+                  placeholder={apiKeyError ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
                   className="w-full pl-4 pr-12 py-3 h-12 max-h-[200px] rounded-xl border bg-background focus:outline-none focus:ring-2 focus:ring-primary resize-none"
                   disabled={isLoading}
                   rows={1}
