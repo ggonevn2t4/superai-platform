@@ -14,7 +14,7 @@ interface ChatHeaderProps {
   setShowAdvancedOptions: (show: boolean) => void;
   isLoading: boolean;
   apiKeyError: boolean;
-  apiProvider?: 'gemini' | 'deepseek';
+  apiProvider?: 'gemini' | 'deepseek' | 'other';
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -40,7 +40,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               <p className="text-sm text-yellow-700">
                 {apiProvider === 'gemini' 
                   ? 'Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'
-                  : 'Quota API DeepSeek đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'}
+                  : apiProvider === 'deepseek'
+                  ? 'Quota API DeepSeek đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'
+                  : 'Quota API đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'}
               </p>
             </div>
           </div>
