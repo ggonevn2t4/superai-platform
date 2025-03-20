@@ -3,6 +3,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Message } from './ChatMessage';
 import { sendMessageToGemini, GeminiError } from '../../services/geminiService';
+import { sendMessageToDeepSeek, DeepSeekError } from '../../services/deepseekService';
 import ChatHeader from './ChatHeader';
 import ChatSettings from './ChatSettings';
 import ChatInput from './ChatInput';
@@ -25,7 +26,7 @@ const ChatInterface: React.FC = () => {
   
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [model, setModel] = useState('gemini-2');
+  const [model, setModel] = useState('deepseek-r1');
   const [isRecording, setIsRecording] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [showAdvancedOptions, setShowAdvancedOptions] = useState(false);
@@ -33,6 +34,7 @@ const ChatInterface: React.FC = () => {
   const [maxTokens, setMaxTokens] = useState(2048);
   const [filterResult, setFilterResult] = useState(false);
   const [apiKeyError, setApiKeyError] = useState(false);
+  const [apiProvider, setApiProvider] = useState<'gemini' | 'deepseek'>('deepseek');
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
@@ -43,6 +45,15 @@ const ChatInterface: React.FC = () => {
   useEffect(() => {
     setCharCount(input.length);
   }, [input]);
+  
+  useEffect(() => {
+    // Set API provider based on model
+    if (model === 'gemini-2') {
+      setApiProvider('gemini');
+    } else if (model === 'deepseek-r1') {
+      setApiProvider('deepseek');
+    }
+  }, [model]);
   
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -62,12 +73,17 @@ const ChatInterface: React.FC = () => {
     setApiKeyError(false);
     
     try {
-      let response: string | GeminiError;
+      let response: string | GeminiError | DeepSeekError;
       
       if (model === 'gemini-2') {
         response = await sendMessageToGemini(input, {
           temperature,
           maxOutputTokens: maxTokens
+        });
+      } else if (model === 'deepseek-r1') {
+        response = await sendMessageToDeepSeek(input, {
+          temperature,
+          maxTokens
         });
       } else {
         response = `Đây là phản hồi mẫu từ mô hình ${model} cho tin nhắn: "${input}".\n\nTrong phiên bản hoàn chỉnh, tôi sẽ tạo ra câu trả lời thực tế dựa trên mô hình AI được chọn.`;
@@ -90,7 +106,11 @@ const ChatInterface: React.FC = () => {
         // Xử lý các lỗi từ API
         if (response.code === 429) {
           setApiKeyError(true);
-          toast.error('Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key.');
+          if (model === 'gemini-2') {
+            toast.error('Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key.');
+          } else {
+            toast.error('Quota API DeepSeek đã hết. Vui lòng thử lại sau hoặc cập nhật API key.');
+          }
         }
         
         const errorMessage: Message = {
@@ -184,6 +204,7 @@ const ChatInterface: React.FC = () => {
             setShowAdvancedOptions={setShowAdvancedOptions}
             isLoading={isLoading}
             apiKeyError={apiKeyError}
+            apiProvider={apiProvider}
           />
           
           <ChatSettings 

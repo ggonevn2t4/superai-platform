@@ -1,20 +1,27 @@
 
 import React, { useState } from 'react';
-import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu } from 'lucide-react';
+import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu, Zap } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Model {
   id: string;
   name: string;
   description: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ElementRef<any>;
 }
 
 interface ModelSelectorProps {
   onChange?: (modelId: string) => void;
+  defaultModel?: string;
 }
 
 const models: Model[] = [
+  { 
+    id: 'deepseek-r1', 
+    name: 'DeepSeek R1', 
+    description: 'Mô hình tiên tiến của DeepSeek',
+    icon: Zap
+  },
   { 
     id: 'gpt-4o', 
     name: 'GPT-4o', 
@@ -41,9 +48,11 @@ const models: Model[] = [
   },
 ];
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 'deepseek-r1' }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [selectedModel, setSelectedModel] = useState<Model>(models[1]); // Default to Gemini
+  const [selectedModel, setSelectedModel] = useState<Model>(
+    models.find(model => model.id === defaultModel) || models[0]
+  );
   
   const handleSelect = (model: Model) => {
     setSelectedModel(model);
@@ -57,7 +66,7 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange }) => {
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-background hover:bg-accent transition-all duration-200 hover:shadow-sm"
+        className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-background/80 hover:bg-accent transition-all duration-200 hover:shadow-sm backdrop-blur-sm"
         type="button"
       >
         <span className="bg-primary/10 p-1 rounded text-primary">

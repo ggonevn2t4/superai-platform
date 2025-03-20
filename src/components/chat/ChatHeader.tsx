@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { RotateCcw, Download, Settings, Filter, AlertTriangle } from 'lucide-react';
+import { RotateCcw, Download, Settings, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ModelSelector from '../ui/ModelSelector';
 import { Button } from '../ui/button';
@@ -14,6 +14,7 @@ interface ChatHeaderProps {
   setShowAdvancedOptions: (show: boolean) => void;
   isLoading: boolean;
   apiKeyError: boolean;
+  apiProvider?: 'gemini' | 'deepseek';
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -24,7 +25,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   showAdvancedOptions,
   setShowAdvancedOptions,
   isLoading,
-  apiKeyError
+  apiKeyError,
+  apiProvider = 'deepseek'
 }) => {
   return (
     <>
@@ -36,7 +38,9 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             </div>
             <div className="ml-3">
               <p className="text-sm text-yellow-700">
-                Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.
+                {apiProvider === 'gemini' 
+                  ? 'Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'
+                  : 'Quota API DeepSeek đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'}
               </p>
             </div>
           </div>
@@ -45,13 +49,13 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
       
       <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
         <div className="flex items-center gap-2 flex-wrap">
-          <ModelSelector onChange={setModel} />
+          <ModelSelector onChange={setModel} defaultModel={model} />
           
           <Button
             onClick={clearChat}
             variant="outline"
             size="sm"
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/80"
             title="Xóa lịch sử trò chuyện"
           >
             <RotateCcw size={16} />
@@ -62,7 +66,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             onClick={exportChatHistory}
             variant="outline"
             size="sm"
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/80"
             title="Xuất lịch sử trò chuyện"
           >
             <Download size={16} />
@@ -73,7 +77,7 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
             onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
             variant={showAdvancedOptions ? "secondary" : "outline"}
             size="sm"
-            className="flex items-center gap-1.5"
+            className="flex items-center gap-1.5 backdrop-blur-sm bg-background/80"
             title="Cài đặt nâng cao"
           >
             <Settings size={16} />
