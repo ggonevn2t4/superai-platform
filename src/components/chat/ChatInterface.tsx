@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Message } from './ChatMessage';
@@ -127,7 +126,6 @@ const ChatInterface: React.FC = () => {
   
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   
-  // Load shared conversation if shareId is provided
   useEffect(() => {
     if (shareId) {
       fetchSharedConversation(shareId);
@@ -138,7 +136,6 @@ const ChatInterface: React.FC = () => {
     try {
       setIsLoading(true);
       
-      // Fetch conversation by share_id
       const { data: conversationData, error: conversationError } = await supabase
         .from('conversations')
         .select('*')
@@ -154,7 +151,6 @@ const ChatInterface: React.FC = () => {
         setIsShared(true);
         setModel(conversationData.model);
         
-        // Fetch messages for this conversation
         const { data: messagesData, error: messagesError } = await supabase
           .from('messages')
           .select('*')
@@ -187,7 +183,6 @@ const ChatInterface: React.FC = () => {
     }
   };
   
-  // Create new conversation in database
   const createConversation = async () => {
     if (!user) return;
     
@@ -206,7 +201,6 @@ const ChatInterface: React.FC = () => {
       
       setConversationId(data.id);
       
-      // Also insert the initial assistant message
       if (messages.length > 0 && messages[0].role === 'assistant') {
         await supabase
           .from('messages')
@@ -214,7 +208,7 @@ const ChatInterface: React.FC = () => {
             conversation_id: data.id,
             role: messages[0].role,
             content: messages[0].content,
-            timestamp: messages[0].timestamp
+            timestamp: messages[0].timestamp.toISOString()
           });
       }
       
@@ -227,7 +221,6 @@ const ChatInterface: React.FC = () => {
     }
   };
   
-  // Save message to database
   const saveMessageToDatabase = async (message: Message, convId: string) => {
     if (!user) return;
     
@@ -238,7 +231,7 @@ const ChatInterface: React.FC = () => {
           conversation_id: convId,
           role: message.role,
           content: message.content,
-          timestamp: message.timestamp,
+          timestamp: message.timestamp.toISOString(),
           feedback: message.feedback
         });
     } catch (error) {
@@ -246,14 +239,13 @@ const ChatInterface: React.FC = () => {
     }
   };
   
-  // Update conversation title
   const updateConversationTitle = async (title: string) => {
     if (!user || !conversationId) return;
     
     try {
       await supabase
         .from('conversations')
-        .update({ title: title, updated_at: new Date() })
+        .update({ title: title, updated_at: new Date().toISOString() })
         .eq('id', conversationId);
       
       setConversationTitle(title);
@@ -262,7 +254,6 @@ const ChatInterface: React.FC = () => {
     }
   };
   
-  // Toggle sharing status
   const toggleSharing = async () => {
     if (!user || !conversationId) {
       toast.error('Vui lòng lưu cuộc trò chuyện trước khi chia sẻ');
@@ -272,7 +263,7 @@ const ChatInterface: React.FC = () => {
     try {
       const { data, error } = await supabase
         .from('conversations')
-        .update({ is_shared: !isShared, updated_at: new Date() })
+        .update({ is_shared: !isShared, updated_at: new Date().toISOString() })
         .eq('id', conversationId)
         .select()
         .single();
@@ -296,7 +287,6 @@ const ChatInterface: React.FC = () => {
     }
   };
   
-  // Save current conversation
   const saveConversation = async () => {
     if (!user) {
       toast.error('Vui lòng đăng nhập để lưu cuộc trò chuyện');
@@ -312,12 +302,10 @@ const ChatInterface: React.FC = () => {
       let currentConversationId = conversationId;
       
       if (!currentConversationId) {
-        // Create new conversation
         currentConversationId = await createConversation();
         if (!currentConversationId) return;
       }
       
-      // Only save messages that aren't already in the database (have uuid as id)
       const newMessages = messages.filter(msg => 
         typeof msg.id === 'string' && msg.id.includes('-')
       );
@@ -404,15 +392,13 @@ const ChatInterface: React.FC = () => {
         
         setMessages(prev => [...prev, assistantMessage]);
         
-        // If conversation is already saved, save this message pair too
         if (conversationId && user) {
           await saveMessageToDatabase(userMessage, conversationId);
           await saveMessageToDatabase(assistantMessage, conversationId);
           
-          // Update the conversation's updated_at timestamp
           await supabase
             .from('conversations')
-            .update({ updated_at: new Date() })
+            .update({ updated_at: new Date().toISOString() })
             .eq('id', conversationId);
         }
       } else {
@@ -513,7 +499,6 @@ const ChatInterface: React.FC = () => {
       )
     );
     
-    // Update feedback in database if this message is stored
     if (conversationId && user) {
       try {
         await supabase

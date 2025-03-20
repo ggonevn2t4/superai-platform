@@ -13,6 +13,7 @@ interface Model {
 interface ModelSelectorProps {
   onChange?: (modelId: string) => void;
   defaultModel?: string;
+  disabled?: boolean; // Added disabled prop
 }
 
 const models: Model[] = [
@@ -96,7 +97,7 @@ const models: Model[] = [
   },
 ];
 
-const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 'deepseek-r1' }) => {
+const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 'deepseek-r1', disabled = false }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedModel, setSelectedModel] = useState<Model>(
     models.find(model => model.id === defaultModel) || models[0]
@@ -114,18 +115,21 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 
     <div className="relative">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 rounded-lg border bg-background/80 hover:bg-accent transition-all duration-200 hover:shadow-sm backdrop-blur-sm"
+        className={cn(
+          "flex items-center gap-2 px-3 py-2 rounded-lg border bg-background/80 hover:bg-accent transition-all duration-200 hover:shadow-sm backdrop-blur-sm",
+          disabled && "opacity-50 cursor-not-allowed hover:bg-background/80"
+        )}
         type="button"
+        disabled={disabled}
       >
         <span className="bg-primary/10 p-1 rounded text-primary">
-          {/* Render the icon component with proper typing */}
           {React.createElement(selectedModel.icon, { size: 16 })}
         </span>
         <span className="text-sm font-medium">{selectedModel.name}</span>
         <ChevronDown size={14} className={cn("transition-transform duration-200 text-muted-foreground", isOpen && "rotate-180")} />
       </button>
       
-      {isOpen && (
+      {isOpen && !disabled && (
         <>
           <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
           <div className="absolute left-0 z-50 mt-2 w-[280px] rounded-lg border bg-popover shadow-lg animate-fade-in">
@@ -143,7 +147,6 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 
                     "mr-2 h-8 w-8 rounded-full flex items-center justify-center",
                     model.id === selectedModel.id ? "bg-primary text-primary-foreground" : "bg-muted"
                   )}>
-                    {/* Render the icon component with proper typing */}
                     {React.createElement(model.icon, { size: 16 })}
                   </div>
                   <div className="flex flex-col items-start">
