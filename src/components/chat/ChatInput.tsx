@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Send, Paperclip, Mic, StopCircle, ArrowUp, Image, Volume2 } from 'lucide-react';
 import { Textarea } from '../ui/textarea';
@@ -71,7 +70,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     reader.onload = (event) => {
       if (event.target?.result) {
         const fileContent = event.target.result.toString().slice(0, 2000);
-        // Create the new string first, then set it
         const newValue = `${input}\n\nNội dung tệp "${file.name}":\n${fileContent}${fileContent.length >= 2000 ? '...' : ''}`;
         setInput(newValue);
         toast.success(`Đã tải lên tệp ${file.name}`);
@@ -115,7 +113,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
           
           const analysis = await analyzeImage(base64Content);
           
-          // Format input with the image analysis
           const imagePrompt = `[Đã tải lên hình ảnh: ${file.name}]\n\nKết quả phân tích:\n${analysis}`;
           setInput(imagePrompt);
           
@@ -153,7 +150,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
         const audioBlob = new Blob(chunks, { type: 'audio/webm' });
         
         try {
-          // Convert blob to base64
           const reader = new FileReader();
           reader.readAsDataURL(audioBlob);
           
@@ -162,8 +158,9 @@ const ChatInput: React.FC<ChatInputProps> = ({
               const base64Audio = reader.result as string;
               const transcription = await speechToText(base64Audio);
               
-              // Add transcription to input
-              setInput((prev) => prev + (prev ? ' ' : '') + transcription);
+              const newInputValue = input + (input ? ' ' : '') + transcription;
+              setInput(newInputValue);
+              
               toast.success('Đã chuyển giọng nói thành văn bản');
             } catch (error) {
               console.error('Error processing speech:', error);
@@ -195,13 +192,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
     if (audioRecorder && audioRecorder.state !== 'inactive') {
       audioRecorder.stop();
       
-      // Stop all audio tracks
       audioRecorder.stream?.getTracks().forEach(track => track.stop());
       toggleRecording();
     }
   };
   
-  // Handle recording toggle
   const handleRecordingToggle = () => {
     if (isProcessingSpeech) return;
     
@@ -212,7 +207,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
   
-  // Text to speech
   const handleTextToSpeech = async () => {
     if (!input.trim() || isProcessingTTS) return;
     
@@ -222,7 +216,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     try {
       const audioContent = await textToSpeech(input, 'nova');
       
-      // Play audio
       const audio = new Audio(audioContent);
       audio.play();
       
