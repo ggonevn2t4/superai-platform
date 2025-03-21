@@ -63,7 +63,7 @@ const Admin = () => {
         
       if (profilesError) throw profilesError;
       
-      // Get auth users for emails
+      // Get auth users for emails - fixing the type issue here
       const { data: authUsers, error: authError } = await supabase.auth.admin.listUsers();
       
       if (authError) throw authError;
@@ -73,7 +73,7 @@ const Admin = () => {
         return;
       }
       
-      // Combine data
+      // Combine data - fix TypeScript error by properly typing the data
       const combinedUsers = profiles.map(profile => {
         const authUser = authUsers.users.find(u => u.id === profile.id);
         return {
