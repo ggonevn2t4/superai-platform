@@ -1,9 +1,12 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { User } from '@supabase/supabase-js';
 import { useAuth } from '@/context/AuthContext';
 import { analyzeImage } from '@/services/mediaServices';
 import { supabase } from '@/integrations/supabase/client';
+import { addMessageToConversation } from '@/services/conversationService';
+import { toast } from 'sonner';
 
 export interface Message {
   id: string;
@@ -11,6 +14,10 @@ export interface Message {
   content: string;
   timestamp: Date;
   pending?: boolean;
+  translated?: string;
+  feedback?: 'positive' | 'negative';
+  isError?: boolean;
+  suggestedQuestions?: string[];
 }
 
 const getSystemPromptForContext = (context: string | null): string => {
@@ -28,14 +35,25 @@ const getSystemPromptForContext = (context: string | null): string => {
   }
 };
 
-export function useChatState(initialContext: string | null = null) {
-  const [messages, setMessages] = useState<Message[]>([]);
+export interface UseChatStateProps {
+  initialContext?: string | null;
+  initialMessages?: Message[];
+  conversationId?: string | null;
+}
+
+export function useChatState({ 
+  initialContext = null, 
+  initialMessages = [], 
+  conversationId = null 
+}: UseChatStateProps = {}) {
+  const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
+  const [activeConversationId, setActiveConversationId] = useState<string | null>(conversationId);
   const { user } = useAuth();
 
-  // Initialize with system message based on context
+  // Initialize with system message based on context if no initial messages
   useEffect(() => {
-    if (initialContext) {
+    if (initialContext && initialMessages.length === 0) {
       const systemPrompt = getSystemPromptForContext(initialContext);
       setMessages([
         {
@@ -56,7 +74,7 @@ export function useChatState(initialContext: string | null = null) {
         }
       ]);
     }
-  }, [initialContext]);
+  }, [initialContext, initialMessages]);
 
   const sendMessage = useCallback(async (content: string, imageBase64?: string) => {
     if (!content && !imageBase64) return;
@@ -97,7 +115,15 @@ export function useChatState(initialContext: string | null = null) {
         content: assistantContent,
         timestamp: new Date(),
       };
+      
       setMessages((prevMessages) => [...prevMessages, assistantMessage]);
+      
+      // If we have an active conversation, save the messages to the database
+      if (activeConversationId && user) {
+        await addMessageToConversation(activeConversationId, newMessage);
+        await addMessageToConversation(activeConversationId, assistantMessage);
+      }
+      
     } catch (error) {
       console.error('Error sending message:', error);
       setMessages((prevMessages) => [
@@ -107,15 +133,22 @@ export function useChatState(initialContext: string | null = null) {
           role: 'assistant',
           content: 'Đã xảy ra lỗi. Vui lòng thử lại.',
           timestamp: new Date(),
+          isError: true,
         },
       ]);
     } finally {
       setIsLoading(false);
     }
-  }, [messages, user]);
+  }, [messages, user, activeConversationId]);
 
   const clear = useCallback(() => {
     setMessages([]);
+    setActiveConversationId(null);
+  }, []);
+  
+  const setConversation = useCallback((id: string | null, newMessages: Message[]) => {
+    setActiveConversationId(id);
+    setMessages(newMessages);
   }, []);
 
   return {
@@ -123,5 +156,7 @@ export function useChatState(initialContext: string | null = null) {
     isLoading,
     sendMessage,
     clear,
+    activeConversationId,
+    setConversation,
   };
 }

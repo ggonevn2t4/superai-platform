@@ -19,7 +19,7 @@ const SharedChat: React.FC = () => {
             Xem cuộc trò chuyện được chia sẻ với bạn
           </p>
         </div>
-        <ChatInterface />
+        <ChatInterface readOnly={true} />
       </div>
     </Layout>
   );

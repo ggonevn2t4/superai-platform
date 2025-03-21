@@ -36,6 +36,11 @@ const App = () => (
                   <Chat />
                 </ProtectedRoute>
               } />
+              <Route path="/chat/:conversationId" element={
+                <ProtectedRoute>
+                  <Chat />
+                </ProtectedRoute>
+              } />
               <Route path="/chat/share/:shareId" element={<SharedChat />} />
               <Route path="/tools" element={
                 <ProtectedRoute>
