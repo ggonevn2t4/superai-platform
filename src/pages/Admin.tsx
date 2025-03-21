@@ -34,6 +34,16 @@ interface UserProfile {
   username: string | null;
 }
 
+// Define the structure of auth users returned by Supabase admin API
+interface AdminUserList {
+  users: Array<{
+    id: string;
+    email?: string;
+    // Add other properties if needed
+  }>;
+  // Add other properties returned by the API if needed
+}
+
 const Admin = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -73,9 +83,12 @@ const Admin = () => {
         return;
       }
       
-      // Combine data - fix TypeScript error by properly typing the data
+      // Properly type the authUsers data to fix the TypeScript error
+      const typedAuthUsers = authUsers as unknown as AdminUserList;
+      
+      // Combine data using properly typed authUsers
       const combinedUsers = profiles.map(profile => {
-        const authUser = authUsers.users.find(u => u.id === profile.id);
+        const authUser = typedAuthUsers.users.find(u => u.id === profile.id);
         return {
           id: profile.id,
           email: authUser?.email || 'No email',
