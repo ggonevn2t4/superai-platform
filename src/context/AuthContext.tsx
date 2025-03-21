@@ -11,6 +11,8 @@ type AuthContextType = {
   signIn: (email: string, password: string) => Promise<void>;
   signUp: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
+  resetPassword: (email: string) => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -72,6 +74,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
+  const resetPassword = async (email: string) => {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/auth?mode=update-password`,
+      });
+      
+      if (error) throw error;
+      toast.success('Đã gửi email khôi phục mật khẩu. Vui lòng kiểm tra hộp thư của bạn.');
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi gửi email khôi phục mật khẩu');
+      throw error;
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password,
+      });
+      
+      if (error) throw error;
+      toast.success('Đã cập nhật mật khẩu thành công');
+    } catch (error: any) {
+      toast.error(error.message || 'Lỗi khi cập nhật mật khẩu');
+      throw error;
+    }
+  };
+
   return (
     <AuthContext.Provider
       value={{
@@ -81,6 +111,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         signIn,
         signUp,
         signOut,
+        resetPassword,
+        updatePassword,
       }}
     >
       {children}
