@@ -17,6 +17,8 @@ import Browser from "./pages/Browser";
 import Creative from "./pages/Creative";
 import WiseBase from "./pages/WiseBase";
 import Help from "./pages/Help";
+import About from "./pages/About";
+import Blog from "./pages/Blog";
 
 const queryClient = new QueryClient();
 
@@ -51,6 +53,8 @@ const App = () => (
               <Route path="/creative" element={<Creative />} />
               <Route path="/wisebase" element={<WiseBase />} />
               <Route path="/help" element={<Help />} />
+              <Route path="/about" element={<About />} />
+              <Route path="/blog" element={<Blog />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

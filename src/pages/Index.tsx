@@ -2,7 +2,7 @@
 import React from 'react';
 import Hero from '../components/home/Hero';
 import Features from '../components/home/Features';
-import { Bot, ArrowRight, Sparkles, Github, LogIn, LogOut, User } from 'lucide-react';
+import { Bot, ArrowRight, Sparkles, Github, LogIn, LogOut, User, FileText, Info } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -33,6 +33,12 @@ const Index: React.FC = () => {
           </Link>
           <Link to="/tools" className="text-muted-foreground hover:text-primary transition-colors font-medium">
             Công cụ
+          </Link>
+          <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors font-medium">
+            Giới thiệu
+          </Link>
+          <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors font-medium">
+            Blog
           </Link>
           <a href="#features" className="text-muted-foreground hover:text-primary transition-colors font-medium">
             Tính năng
@@ -102,12 +108,21 @@ const Index: React.FC = () => {
               SuperAI kết hợp các công nghệ AI tiên tiến nhất để mang đến trải nghiệm toàn diện nhất cho bạn.
             </p>
             
-            <Link
-              to="/chat"
-              className="bg-primary text-white px-8 py-4 rounded-lg font-medium inline-flex items-center gap-2 shadow-md hover:shadow-lg transition-all button-effect group"
-            >
-              Bắt đầu trò chuyện với SuperAI <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                to="/chat"
+                className="bg-primary text-white px-8 py-4 rounded-lg font-medium inline-flex items-center gap-2 shadow-md hover:shadow-lg transition-all button-effect group"
+              >
+                Bắt đầu trò chuyện với SuperAI <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+              
+              <Link
+                to="/about"
+                className="bg-white text-primary border border-primary px-8 py-4 rounded-lg font-medium inline-flex items-center gap-2 shadow-sm hover:shadow-md transition-all"
+              >
+                <Info size={20} /> Tìm hiểu thêm
+              </Link>
+            </div>
           </div>
         </section>
       </main>
@@ -122,13 +137,19 @@ const Index: React.FC = () => {
               <span className="font-bold text-xl">SuperAI</span>
             </div>
             
-            <div className="flex items-center gap-6">
-              <a href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <Github size={20} />
-              </a>
+            <div className="flex items-center gap-6 mb-6 md:mb-0">
+              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                Giới thiệu
+              </Link>
+              <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">
+                Blog
+              </Link>
+              <Link to="/help" className="text-muted-foreground hover:text-primary transition-colors">
+                Trợ giúp
+              </Link>
             </div>
             
-            <div className="text-sm text-muted-foreground mt-6 md:mt-0">
+            <div className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} SuperAI. Nền tảng AI toàn diện.
             </div>
           </div>

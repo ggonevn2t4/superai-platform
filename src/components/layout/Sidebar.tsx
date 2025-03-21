@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X } from 'lucide-react';
+import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import {
@@ -30,6 +30,8 @@ const Sidebar: React.FC = () => {
     { icon: <SearchCode size={isMobile ? 18 : 20} />, label: 'Trình duyệt', path: '/browser' },
     { icon: <Sparkles size={isMobile ? 18 : 20} />, label: 'Sáng tạo', path: '/creative' },
     { icon: <Layers size={isMobile ? 18 : 20} />, label: 'Wisebase', path: '/wisebase' },
+    { icon: <Info size={isMobile ? 18 : 20} />, label: 'Giới thiệu', path: '/about' },
+    { icon: <FileText size={isMobile ? 18 : 20} />, label: 'Blog', path: '/blog' },
     { icon: <BookOpen size={isMobile ? 18 : 20} />, label: 'Trợ giúp', path: '/help' },
   ];
   
