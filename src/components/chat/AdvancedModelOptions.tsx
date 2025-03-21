@@ -1,9 +1,11 @@
 
-import React from 'react';
-import { Filter, Thermometer, Hash } from 'lucide-react';
+import React, { useState } from 'react';
+import { Filter, Thermometer, Hash, ChevronDown, ChevronUp } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import ModelSettingsPanel from './ModelSettingsPanel';
 
 interface AdvancedModelOptionsProps {
   temperature: number;
@@ -24,6 +26,35 @@ const AdvancedModelOptions: React.FC<AdvancedModelOptionsProps> = ({
   setFilterResult,
   model
 }) => {
+  const [showAdvancedSettings, setShowAdvancedSettings] = useState(false);
+  const [presencePenalty, setPresencePenalty] = useState(0);
+  const [frequencyPenalty, setFrequencyPenalty] = useState(0);
+  const [creativityMode, setCreativityMode] = useState<'balanced' | 'precise' | 'creative'>('balanced');
+  const [streamingEnabled, setStreamingEnabled] = useState(true);
+
+  // Áp dụng chế độ sáng tạo
+  const applyCreativityMode = (mode: 'balanced' | 'precise' | 'creative') => {
+    setCreativityMode(mode);
+    
+    switch(mode) {
+      case 'precise':
+        setTemperature(0.2);
+        setPresencePenalty(-0.5);
+        setFrequencyPenalty(-0.5);
+        break;
+      case 'balanced':
+        setTemperature(0.7);
+        setPresencePenalty(0);
+        setFrequencyPenalty(0);
+        break;
+      case 'creative':
+        setTemperature(1.0);
+        setPresencePenalty(0.7);
+        setFrequencyPenalty(0.7);
+        break;
+    }
+  };
+
   return (
     <div className="mb-4 border rounded-lg p-4 bg-background/80 backdrop-blur-sm animate-scale-in">
       <h3 className="text-sm font-medium mb-3">Cài đặt trò chuyện</h3>
@@ -97,6 +128,40 @@ const AdvancedModelOptions: React.FC<AdvancedModelOptionsProps> = ({
           </div>
         </div>
       </div>
+      
+      <div className="mt-3 flex justify-center">
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-xs flex items-center gap-1 text-muted-foreground"
+          onClick={() => setShowAdvancedSettings(!showAdvancedSettings)}
+        >
+          {showAdvancedSettings ? (
+            <>
+              <ChevronUp size={14} />
+              Ẩn cài đặt nâng cao
+            </>
+          ) : (
+            <>
+              <ChevronDown size={14} />
+              Hiển thị cài đặt nâng cao
+            </>
+          )}
+        </Button>
+      </div>
+      
+      {showAdvancedSettings && (
+        <ModelSettingsPanel 
+          presencePenalty={presencePenalty}
+          setPresencePenalty={setPresencePenalty}
+          frequencyPenalty={frequencyPenalty}
+          setFrequencyPenalty={setFrequencyPenalty}
+          creativityMode={creativityMode}
+          setCreativityMode={applyCreativityMode}
+          streamingEnabled={streamingEnabled}
+          setStreamingEnabled={setStreamingEnabled}
+        />
+      )}
     </div>
   );
 };

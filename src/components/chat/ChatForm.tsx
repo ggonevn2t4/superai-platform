@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import ChatInput from './ChatInput';
 import AdvancedModelOptions from './AdvancedModelOptions';
+import QuickPrompts from './QuickPrompts';
 
 interface ChatFormProps {
   isLoading: boolean;
@@ -30,25 +31,46 @@ const ChatForm: React.FC<ChatFormProps> = ({
   maxTokens,
   setMaxTokens,
   filterResult,
-  setFilterResult,
+  setFilterResult
 }) => {
   const [input, setInput] = useState('');
   const [toggleAdvancedOptions, setToggleAdvancedOptions] = useState(showAdvancedOptions);
-
+  const [showQuickPrompts, setShowQuickPrompts] = useState(false);
+  
   const toggleOptions = () => {
     setToggleAdvancedOptions(!toggleAdvancedOptions);
   };
-
+  
   const handleFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
       handleSubmit(e);
       setInput('');
+      setShowQuickPrompts(false);
     }
   };
-
+  
+  const handleSelectPrompt = (prompt: string) => {
+    setInput(prompt);
+    setShowQuickPrompts(false);
+    // Focus vào input sau khi chọn prompt
+    const textarea = document.querySelector('textarea');
+    if (textarea) {
+      textarea.focus();
+    }
+  };
+  
   const charCount = input.length;
-
+  
+  // Hiển thị gợi ý nhanh khi input trống và không đang tải
+  React.useEffect(() => {
+    if (!input && !isLoading && !isReadOnly) {
+      setShowQuickPrompts(true);
+    } else {
+      setShowQuickPrompts(false);
+    }
+  }, [input, isLoading, isReadOnly]);
+  
   return (
     <div className="p-4 border-t">
       {toggleAdvancedOptions && (
@@ -62,6 +84,11 @@ const ChatForm: React.FC<ChatFormProps> = ({
           model={model}
         />
       )}
+      
+      {showQuickPrompts && (
+        <QuickPrompts onSelectPrompt={handleSelectPrompt} />
+      )}
+      
       <ChatInput
         input={input}
         setInput={setInput}
