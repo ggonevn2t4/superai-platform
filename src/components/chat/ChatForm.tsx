@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import ChatInput from './ChatInput';
 import ChatSettings from './ChatSettings';
 
@@ -32,17 +32,25 @@ const ChatForm: React.FC<ChatFormProps> = ({
   filterResult,
   setFilterResult
 }) => {
+  const [input, setInput] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
+  const charCount = input.length;
+
+  const toggleRecording = () => {
+    setIsRecording(prev => !prev);
+  };
+
   return (
     <>
       <ChatInput 
-        input=""
-        setInput={() => {}}
+        input={input}
+        setInput={setInput}
         isLoading={isLoading}
         handleSubmit={handleSubmit}
         apiKeyError={apiKeyError}
-        isRecording={false}
-        toggleRecording={() => {}}
-        charCount={0}
+        isRecording={isRecording}
+        toggleRecording={toggleRecording}
+        charCount={charCount}
         model={model}
         isReadOnly={isReadOnly}
       />
