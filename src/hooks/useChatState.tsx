@@ -19,6 +19,7 @@ export function useChatState({
   const [isLoading, setIsLoading] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(conversationId);
   const { user } = useAuth();
+  const [model, setModel] = useState('deepseek-r1');
 
   // Use smaller, focused hooks
   const { messages, setMessages } = useChatMessages({ initialContext, initialMessages });
@@ -27,7 +28,7 @@ export function useChatState({
   // Initialize messages with appropriate system prompts based on context
   useChatInitializer({ initialContext, initialMessages, setMessages });
 
-  const sendMessage = useCallback(async (content: string, imageBase64?: string) => {
+  const sendMessage = useCallback(async (content: string, imageBase64?: string, customModel?: string) => {
     if (!content && !imageBase64) return;
 
     setIsLoading(true);
@@ -40,8 +41,15 @@ export function useChatState({
     setMessages((prevMessages) => [...prevMessages, newMessage]);
 
     try {
-      // Get response from AI service
-      const assistantContent = await processUserMessage(content, imageBase64, messages, newMessage);
+      // Get response from AI service, passing the current model
+      const currentModel = customModel || model;
+      const assistantContent = await processUserMessage(
+        content, 
+        imageBase64, 
+        messages, 
+        newMessage,
+        currentModel
+      );
       
       const assistantMessage: Message = {
         id: uuidv4(),
@@ -73,7 +81,7 @@ export function useChatState({
     } finally {
       setIsLoading(false);
     }
-  }, [messages, user, activeConversationId, setMessages, processUserMessage]);
+  }, [messages, user, activeConversationId, setMessages, processUserMessage, model]);
 
   const clear = useCallback(() => {
     setMessages([]);
@@ -92,5 +100,7 @@ export function useChatState({
     clear,
     activeConversationId,
     setConversation,
+    model,
+    setModel
   };
 }

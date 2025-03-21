@@ -35,7 +35,9 @@ export function useChatInterface({
     sendMessage, 
     clear, 
     activeConversationId, 
-    setConversation 
+    setConversation,
+    model: stateModel,
+    setModel: setStateModel
   } = useChatState({
     initialContext,
     initialMessages: initialMsgs,
@@ -70,10 +72,21 @@ export function useChatInterface({
     if (isShared) {
       setIsSharedState(isShared);
     }
-    if (conversationModel !== 'deepseek-x') {
+    if (conversationModel !== 'deepseek-r1') {
       setModel(conversationModel);
+      setStateModel(conversationModel);
     }
-  }, [conversationTitle, isShared, conversationModel, setModel]);
+  }, [conversationTitle, isShared, conversationModel, setModel, setStateModel]);
+  
+  // Sync model changes to chat state
+  useEffect(() => {
+    setStateModel(model);
+  }, [model, setStateModel]);
+  
+  // Enhanced sendMessage function that includes the current model
+  const handleSendMessage = (content: string, imageBase64?: string) => {
+    return sendMessage(content, imageBase64, model);
+  };
   
   // Initialize chat actions
   const { 
@@ -122,7 +135,7 @@ export function useChatInterface({
     setMaxTokens,
     setFilterResult,
     setShowAdvancedOptions,
-    sendMessage,
+    sendMessage: handleSendMessage,
     clear,
     handleMessageFeedback,
     handleSelectSuggestedQuestion,
