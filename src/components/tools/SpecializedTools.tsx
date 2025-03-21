@@ -3,7 +3,9 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from 'react-router-dom';
-import { Bot, Code, FileText, Brain, Image, Search, ArrowRight } from 'lucide-react';
+import { Bot, Code, FileText, Brain, Image, Search, ArrowRight, Globe, Volume2 } from 'lucide-react';
+import TextToSpeech from './TextToSpeech';
+import WebBrowser from './WebBrowser';
 
 interface AITool {
   id: string;
@@ -113,6 +115,16 @@ const SpecializedTools: React.FC = () => {
             </CardFooter>
           </Card>
         ))}
+      </div>
+
+      <div className="mt-10 mb-6">
+        <h2 className="text-2xl font-bold">Công cụ bổ sung</h2>
+        <p className="text-muted-foreground mt-1">Các tiện ích AI hữu ích khác</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <TextToSpeech />
+        <WebBrowser />
       </div>
     </div>
   );
