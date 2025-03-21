@@ -1,7 +1,6 @@
 
 import React, { useState, useCallback, useEffect, memo } from 'react';
 import ChatInput from './ChatInput';
-import AdvancedModelOptions from './AdvancedModelOptions';
 import QuickPrompts from './QuickPrompts';
 
 interface ChatFormProps {
@@ -34,12 +33,7 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
   setFilterResult
 }) => {
   const [input, setInput] = useState('');
-  const [toggleAdvancedOptions, setToggleAdvancedOptions] = useState(showAdvancedOptions);
   const [showQuickPrompts, setShowQuickPrompts] = useState(false);
-  
-  const toggleOptions = useCallback(() => {
-    setToggleAdvancedOptions(prev => !prev);
-  }, []);
   
   const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
@@ -73,25 +67,8 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
     }
   }, [input, isLoading, isReadOnly]);
   
-  // Update toggled options when prop changes
-  useEffect(() => {
-    setToggleAdvancedOptions(showAdvancedOptions);
-  }, [showAdvancedOptions]);
-  
   return (
     <div className="p-4 border-t">
-      {toggleAdvancedOptions && (
-        <AdvancedModelOptions
-          temperature={temperature}
-          setTemperature={setTemperature}
-          maxTokens={maxTokens}
-          setMaxTokens={setMaxTokens}
-          filterResult={filterResult}
-          setFilterResult={setFilterResult}
-          model={model}
-        />
-      )}
-      
       {showQuickPrompts && (
         <QuickPrompts onSelectPrompt={handleSelectPrompt} />
       )}
@@ -105,8 +82,8 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
         charCount={charCount}
         model={model}
         isReadOnly={isReadOnly}
-        showAdvancedOptions={toggleAdvancedOptions}
-        toggleAdvancedOptions={toggleOptions}
+        showAdvancedOptions={false}
+        toggleAdvancedOptions={() => {}}
       />
     </div>
   );

@@ -37,8 +37,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
       charCount={charCount}
       model={model}
       isReadOnly={isReadOnly}
-      showAdvancedOptions={showAdvancedOptions}
-      toggleAdvancedOptions={toggleAdvancedOptions}
+      showAdvancedOptions={false}
+      toggleAdvancedOptions={() => {}}
     />
   );
 };

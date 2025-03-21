@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MoreHorizontal, Trash2, Settings2 } from 'lucide-react';
+import { MoreHorizontal, Trash2 } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -65,10 +65,6 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>Tùy chọn</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
-                  <Settings2 className="mr-2 h-4 w-4" />
-                  <span>Cài đặt nâng cao</span>
-                </DropdownMenuItem>
                 <DropdownMenuItem onClick={clearChat}>
                   <Trash2 className="mr-2 h-4 w-4" />
                   <span>Xóa cuộc trò chuyện</span>
