@@ -1,51 +1,22 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { User } from '@supabase/supabase-js';
 import { useAuth } from '@/context/AuthContext';
 import { analyzeImage } from '@/services/mediaServices';
 import { supabase } from '@/integrations/supabase/client';
 import { addMessageToConversation } from '@/services/conversation';
 import { toast } from 'sonner';
+import { Message, UseChatStateProps, ChatState } from '@/types/chatTypes';
+import { getSystemPromptForContext, getWelcomeMessageForContext } from '@/utils/chatUtils';
 
-export interface Message {
-  id: string;
-  role: 'user' | 'assistant' | 'system';
-  content: string;
-  timestamp: Date;
-  pending?: boolean;
-  translated?: string;
-  feedback?: 'positive' | 'negative';
-  isError?: boolean;
-  suggestedQuestions?: string[];
-}
-
-const getSystemPromptForContext = (context: string | null): string => {
-  switch(context) {
-    case 'market_intelligence':
-      return 'Bạn là một trợ lý AI chuyên về phân tích thị trường và chiến lược kinh doanh. Hãy giúp người dùng hiểu về thị trường, xu hướng, cơ hội, và đối thủ cạnh tranh. Cung cấp thông tin và phân tích sâu sắc để hỗ trợ ra quyết định kinh doanh.';
-    case 'data_analysis':
-      return 'Bạn là một trợ lý AI chuyên về phân tích dữ liệu. Hãy giúp người dùng hiểu và phân tích dữ liệu, tạo báo cáo, và rút ra những hiểu biết quan trọng từ dữ liệu. Hướng dẫn họ về các phương pháp phân tích và công cụ phù hợp.';
-    case 'code_advisor':
-      return 'Bạn là một trợ lý AI chuyên về lập trình. Hãy giúp người dùng với các vấn đề về code, giải thích các khái niệm lập trình, và cung cấp giải pháp cho các lỗi. Tập trung vào việc giải thích rõ ràng và code sạch.';
-    case 'content_creation':
-      return 'Bạn là một trợ lý AI chuyên về tạo nội dung. Hãy giúp người dùng viết, chỉnh sửa, và cải thiện nội dung của họ. Cung cấp ý tưởng, gợi ý về văn phong, và hỗ trợ tạo nội dung hấp dẫn cho nhiều mục đích khác nhau.';
-    default:
-      return 'Bạn là một trợ lý AI hữu ích và thân thiện. Hãy giúp người dùng với bất kỳ câu hỏi hoặc vấn đề nào một cách tốt nhất có thể.';
-  }
-};
-
-export interface UseChatStateProps {
-  initialContext?: string | null;
-  initialMessages?: Message[];
-  conversationId?: string | null;
-}
+export type { Message };
+export type { UseChatStateProps };
 
 export function useChatState({ 
   initialContext = null, 
   initialMessages = [], 
   conversationId = null 
-}: UseChatStateProps = {}) {
+}: UseChatStateProps = {}): ChatState {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [isLoading, setIsLoading] = useState(false);
   const [activeConversationId, setActiveConversationId] = useState<string | null>(conversationId);
@@ -65,11 +36,7 @@ export function useChatState({
         {
           id: uuidv4(),
           role: 'assistant',
-          content: `Chào mừng bạn đến với ${initialContext === 'market_intelligence' ? 'Market Intelligence Navigator' : 
-                  initialContext === 'data_analysis' ? 'Data Analysis Accelerator' : 
-                  initialContext === 'code_advisor' ? 'Intelligent Code Advisor' : 
-                  initialContext === 'content_creation' ? 'Content Creation Suite' : 
-                  'trợ lý AI'}. Tôi có thể giúp gì cho bạn?`,
+          content: getWelcomeMessageForContext(initialContext),
           timestamp: new Date(),
         }
       ]);
