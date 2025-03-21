@@ -8,7 +8,7 @@ import { addMessageToConversation } from '@/services/conversation';
 import { toast } from 'sonner';
 import { Message, UseChatStateProps, ChatState } from '@/types/chatTypes';
 import { getSystemPromptForContext, getWelcomeMessageForContext } from '@/utils/chatUtils';
-import { sendMessageToGemini } from '@/services/geminiService';
+import { sendMessageToGemini } from '@/services/gemini';
 import { sendMessageToDeepSeek } from '@/services/deepseek';
 
 export type { Message };
