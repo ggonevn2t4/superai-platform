@@ -5,7 +5,9 @@ import { FileUploadButton } from './';
 import { ImageUploadButton } from './';
 import { VoiceRecordButton } from './';
 import { SendButton } from './';
+import { ToggleModelButton } from './';
 import { cn } from '@/lib/utils';
+import { toast } from '@/components/ui/use-toast';
 
 interface ChatInputContainerProps {
   input: string;
@@ -16,6 +18,8 @@ interface ChatInputContainerProps {
   charCount: number;
   model: string;
   isReadOnly?: boolean;
+  showAdvancedOptions: boolean;
+  toggleAdvancedOptions: () => void;
 }
 
 const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
@@ -26,7 +30,9 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
   apiKeyError,
   charCount,
   model,
-  isReadOnly = false
+  isReadOnly = false,
+  showAdvancedOptions,
+  toggleAdvancedOptions
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
@@ -46,6 +52,16 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
+      if (isLoading || !input.trim() || (apiKeyError && model === 'gemini-2') || isProcessingSpeech) {
+        if (!input.trim()) {
+          toast({
+            title: "Vui lòng nhập nội dung",
+            description: "Bạn cần nhập tin nhắn trước khi gửi",
+            variant: "destructive",
+          });
+        }
+        return;
+      }
       handleSubmit(e);
     }
   };
@@ -106,6 +122,12 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
           <div className="absolute right-14 top-3 text-xs text-muted-foreground font-medium">
             {charCount > 0 && `${charCount} ký tự`}
           </div>
+          
+          <ToggleModelButton
+            onClick={toggleAdvancedOptions}
+            showAdvancedOptions={showAdvancedOptions}
+            disabled={isLoading}
+          />
           
           <VoiceRecordButton 
             onTranscription={handleVoiceTranscription} 

@@ -1,14 +1,14 @@
 
 import React, { useState } from 'react';
 import ChatInput from './ChatInput';
-import ChatSettings from './ChatSettings';
+import AdvancedModelOptions from './AdvancedModelOptions';
 
 interface ChatFormProps {
   isLoading: boolean;
   handleSubmit: (e: React.FormEvent) => void;
   apiKeyError: boolean;
   model: string;
-  isReadOnly: boolean;
+  isReadOnly?: boolean;
   showAdvancedOptions: boolean;
   temperature: number;
   setTemperature: (value: number) => void;
@@ -23,47 +23,58 @@ const ChatForm: React.FC<ChatFormProps> = ({
   handleSubmit,
   apiKeyError,
   model,
-  isReadOnly,
+  isReadOnly = false,
   showAdvancedOptions,
   temperature,
   setTemperature,
   maxTokens,
   setMaxTokens,
   filterResult,
-  setFilterResult
+  setFilterResult,
 }) => {
   const [input, setInput] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
-  const charCount = input.length;
+  const [toggleAdvancedOptions, setToggleAdvancedOptions] = useState(showAdvancedOptions);
 
-  const toggleRecording = () => {
-    setIsRecording(prev => !prev);
+  const toggleOptions = () => {
+    setToggleAdvancedOptions(!toggleAdvancedOptions);
   };
 
+  const handleFormSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim()) {
+      handleSubmit(e);
+      setInput('');
+    }
+  };
+
+  const charCount = input.length;
+
   return (
-    <>
-      <ChatInput 
+    <div className="p-4 border-t">
+      {toggleAdvancedOptions && (
+        <AdvancedModelOptions
+          temperature={temperature}
+          setTemperature={setTemperature}
+          maxTokens={maxTokens}
+          setMaxTokens={setMaxTokens}
+          filterResult={filterResult}
+          setFilterResult={setFilterResult}
+          model={model}
+        />
+      )}
+      <ChatInput
         input={input}
         setInput={setInput}
         isLoading={isLoading}
-        handleSubmit={handleSubmit}
+        handleSubmit={handleFormSubmit}
         apiKeyError={apiKeyError}
-        isRecording={isRecording}
-        toggleRecording={toggleRecording}
         charCount={charCount}
         model={model}
         isReadOnly={isReadOnly}
+        showAdvancedOptions={toggleAdvancedOptions}
+        toggleAdvancedOptions={toggleOptions}
       />
-      <ChatSettings 
-        showAdvancedOptions={showAdvancedOptions}
-        temperature={temperature}
-        setTemperature={setTemperature}
-        maxTokens={maxTokens}
-        setMaxTokens={setMaxTokens}
-        filterResult={filterResult}
-        setFilterResult={setFilterResult}
-      />
-    </>
+    </div>
   );
 };
 

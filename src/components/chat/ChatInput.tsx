@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { ChatInputContainer } from './input';
 
 interface ChatInputProps {
@@ -8,11 +8,11 @@ interface ChatInputProps {
   isLoading: boolean;
   handleSubmit: (e: React.FormEvent) => void;
   apiKeyError: boolean;
-  isRecording: boolean;
-  toggleRecording: () => void;
   charCount: number;
   model: string;
   isReadOnly?: boolean;
+  showAdvancedOptions: boolean;
+  toggleAdvancedOptions: () => void;
 }
 
 const ChatInput: React.FC<ChatInputProps> = ({
@@ -21,11 +21,11 @@ const ChatInput: React.FC<ChatInputProps> = ({
   isLoading,
   handleSubmit,
   apiKeyError,
-  isRecording: _isRecording, // Not used anymore
-  toggleRecording: _toggleRecording, // Not used anymore
   charCount,
   model,
-  isReadOnly = false
+  isReadOnly = false,
+  showAdvancedOptions,
+  toggleAdvancedOptions
 }) => {
   return (
     <ChatInputContainer
@@ -37,6 +37,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
       charCount={charCount}
       model={model}
       isReadOnly={isReadOnly}
+      showAdvancedOptions={showAdvancedOptions}
+      toggleAdvancedOptions={toggleAdvancedOptions}
     />
   );
 };

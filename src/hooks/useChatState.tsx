@@ -8,6 +8,8 @@ import { addMessageToConversation } from '@/services/conversation';
 import { toast } from 'sonner';
 import { Message, UseChatStateProps, ChatState } from '@/types/chatTypes';
 import { getSystemPromptForContext, getWelcomeMessageForContext } from '@/utils/chatUtils';
+import { sendMessageToGemini } from '@/services/geminiService';
+import { sendMessageToDeepSeek } from '@/services/deepseek';
 
 export type { Message };
 export type { UseChatStateProps };
@@ -43,6 +45,33 @@ export function useChatState({
     }
   }, [initialContext, initialMessages]);
 
+  // Function to try alternative AI services when Supabase function fails
+  const tryAlternativeAIServices = async (messageContent: string): Promise<string> => {
+    try {
+      // First try Gemini
+      console.log('Trying Gemini API as fallback...');
+      const geminiResponse = await sendMessageToGemini(messageContent);
+      
+      if (typeof geminiResponse === 'string') {
+        return geminiResponse;
+      }
+      
+      // If Gemini fails, try DeepSeek
+      console.log('Gemini failed, trying DeepSeek API as fallback...');
+      const deepseekResponse = await sendMessageToDeepSeek(messageContent);
+      
+      if (typeof deepseekResponse === 'string') {
+        return deepseekResponse;
+      }
+      
+      // If both fail, throw error
+      throw new Error('Các dịch vụ AI thay thế đều không khả dụng.');
+    } catch (error) {
+      console.error('Lỗi khi sử dụng các dịch vụ AI thay thế:', error);
+      throw error;
+    }
+  };
+
   const sendMessage = useCallback(async (content: string, imageBase64?: string) => {
     if (!content && !imageBase64) return;
 
@@ -61,18 +90,27 @@ export function useChatState({
       if (imageBase64) {
         assistantContent = await analyzeImage(imageBase64);
       } else {
-        const { data, error } = await supabase.functions.invoke('openai-chat', {
-          body: {
-            messages: [...messages, newMessage].map(msg => ({ role: msg.role, content: msg.content })),
-            userId: user?.id,
-          },
-        });
+        try {
+          const { data, error } = await supabase.functions.invoke('openai-chat', {
+            body: {
+              messages: [...messages, newMessage].map(msg => ({ role: msg.role, content: msg.content })),
+              userId: user?.id,
+            },
+          });
 
-        if (error) {
-          console.error('Error from Supabase function:', error);
-          assistantContent = 'Lỗi khi kết nối với trợ lý AI.';
-        } else {
-          assistantContent = data.choices[0].message.content;
+          if (error) {
+            console.error('Error from Supabase function:', error);
+            toast.error('Gặp lỗi khi kết nối với Supabase function, đang thử phương án dự phòng...');
+            // Try using alternative AI services
+            assistantContent = await tryAlternativeAIServices(content);
+          } else {
+            assistantContent = data.choices[0].message.content;
+          }
+        } catch (error) {
+          console.error('Lỗi khi kết nối với Supabase function, đang thử phương án dự phòng:', error);
+          toast.error('Đang thử kết nối với dịch vụ AI thay thế...');
+          // Try using alternative AI services
+          assistantContent = await tryAlternativeAIServices(content);
         }
       }
 
@@ -98,7 +136,7 @@ export function useChatState({
         {
           id: uuidv4(),
           role: 'assistant',
-          content: 'Đã xảy ra lỗi. Vui lòng thử lại.',
+          content: 'Đã xảy ra lỗi. Vui lòng thử lại hoặc thay đổi mô hình AI trong cài đặt.',
           timestamp: new Date(),
           isError: true,
         },
