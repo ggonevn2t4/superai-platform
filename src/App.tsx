@@ -19,6 +19,7 @@ import WiseBase from "./pages/WiseBase";
 import Help from "./pages/Help";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Tutorials from "./pages/Tutorials";
 import Documentation from "./pages/Documentation";
 import Admin from "./pages/Admin";
@@ -58,6 +59,8 @@ const App = () => (
               <Route path="/help" element={<Help />} />
               <Route path="/about" element={<About />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/blog/category/:category" element={<Blog />} />
+              <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/tutorials" element={<Tutorials />} />
               <Route path="/documentation" element={<Documentation />} />
               <Route path="/admin" element={

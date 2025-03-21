@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText, Shield } from 'lucide-react';
+import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText, Shield, BookText, LightbulbIcon } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,6 +19,7 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
@@ -51,15 +52,15 @@ const Sidebar: React.FC = () => {
   }, [user]);
   
   const navItems = [
-    { icon: <MessageSquare size={isMobile ? 18 : 20} />, label: 'Chat', path: '/chat' },
-    { icon: <BrainCircuit size={isMobile ? 18 : 20} />, label: 'Tools', path: '/tools' },
-    { icon: <SearchCode size={isMobile ? 18 : 20} />, label: 'Trình duyệt', path: '/browser' },
-    { icon: <Sparkles size={isMobile ? 18 : 20} />, label: 'Sáng tạo', path: '/creative' },
-    { icon: <Layers size={isMobile ? 18 : 20} />, label: 'Wisebase', path: '/wisebase' },
-    { icon: <Info size={isMobile ? 18 : 20} />, label: 'Giới thiệu', path: '/about' },
-    { icon: <FileText size={isMobile ? 18 : 20} />, label: 'Blog', path: '/blog' },
-    { icon: <BookOpen size={isMobile ? 18 : 20} />, label: 'Trợ giúp', path: '/help' },
-    ...(isAdmin ? [{ icon: <Shield size={isMobile ? 18 : 20} />, label: 'Admin', path: '/admin' }] : []),
+    { icon: <MessageSquare size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Chat', path: '/chat' },
+    { icon: <BrainCircuit size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Công cụ', path: '/tools' },
+    { icon: <SearchCode size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Trình duyệt', path: '/browser' },
+    { icon: <Sparkles size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Sáng tạo', path: '/creative' },
+    { icon: <Layers size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Wisebase', path: '/wisebase' },
+    { icon: <FileText size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Blog', path: '/blog' },
+    { icon: <Info size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Giới thiệu', path: '/about' },
+    { icon: <BookOpen size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Trợ giúp', path: '/help' },
+    ...(isAdmin ? [{ icon: <Shield size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Admin', path: '/admin' }] : []),
   ];
   
   const renderNavItems = () => (
@@ -68,9 +69,9 @@ const Sidebar: React.FC = () => {
         <Link
           key={index}
           to={item.path}
-          className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-all duration-200 whitespace-nowrap ${
+          className={`flex items-center gap-2 px-3 md:px-4 py-2 rounded-lg transition-all duration-300 whitespace-nowrap ${
             location.pathname === item.path
-              ? 'bg-sidebar-accent text-sidebar-primary font-medium'
+              ? 'bg-primary/10 text-primary font-medium shadow-sm'
               : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
           }`}
         >
@@ -83,8 +84,8 @@ const Sidebar: React.FC = () => {
   
   if (isMobile) {
     return (
-      <div className="w-full bg-sidebar border-b border-sidebar-border fixed top-0 left-0 z-10 shadow-sm">
-        <div className="container mx-auto px-2">
+      <div className="w-full bg-white border-b border-sidebar-border fixed top-0 left-0 z-10 shadow-sm">
+        <div className="container mx-auto px-3">
           <div className="flex items-center h-14">
             <Link to="/" className="flex items-center gap-1 mr-3">
               <Bot size={22} className="text-primary" />
@@ -106,7 +107,7 @@ const Sidebar: React.FC = () => {
                           to={item.path}
                           className={`flex items-center gap-3 px-4 py-3 mb-1 rounded-lg transition-all duration-200 ${
                             location.pathname === item.path
-                              ? 'bg-sidebar-accent text-sidebar-primary font-medium'
+                              ? 'bg-primary/10 text-primary font-medium shadow-sm'
                               : 'text-sidebar-foreground hover:bg-sidebar-accent/50'
                           }`}
                         >
@@ -143,12 +144,16 @@ const Sidebar: React.FC = () => {
   }
 
   return (
-    <div className="w-full bg-sidebar border-b border-sidebar-border fixed top-0 left-0 z-10 shadow-sm">
+    <div className="w-full bg-white border-b border-sidebar-border fixed top-0 left-0 z-10 shadow-sm">
       <div className="container mx-auto px-4">
         <div className="flex items-center h-16">
-          <Link to="/" className="flex items-center gap-2 mr-8">
-            <Bot size={24} className="text-primary" />
-            <span className="font-semibold text-xl">SuperAI</span>
+          <Link to="/" className="flex items-center gap-2 mr-8 group">
+            <div className="bg-primary p-1.5 rounded-lg transition-all duration-300 group-hover:scale-110">
+              <Bot size={20} className="text-white" />
+            </div>
+            <span className="font-semibold text-xl bg-clip-text text-transparent bg-gradient-to-r from-primary to-blue-600">
+              SuperAI
+            </span>
           </Link>
           
           {renderNavItems()}
@@ -157,14 +162,15 @@ const Sidebar: React.FC = () => {
             {user && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm" className="h-8 gap-2">
-                    <div className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-white">
+                  <Button variant="ghost" size="sm" className="h-9 gap-2 hover:bg-primary/5">
+                    <div className={cn("h-8 w-8 rounded-full flex items-center justify-center text-white", 
+                      location.pathname === '/chat' ? "bg-primary" : "bg-primary/90")}>
                       <span className="text-sm font-medium">{user.email?.charAt(0).toUpperCase() || 'U'}</span>
                     </div>
                     <span className="hidden md:inline-block text-sm">{user.email?.split('@')[0]}</span>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
+                <DropdownMenuContent align="end" className="w-56">
                   <DropdownMenuItem className="text-sm">
                     <User className="mr-2 h-4 w-4" />
                     <span className="truncate">{user.email}</span>
