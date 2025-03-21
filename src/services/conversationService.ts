@@ -18,11 +18,18 @@ export interface Conversation {
 // Create a new conversation
 export const createConversation = async (title: string, model: string, messages: Message[]): Promise<string | null> => {
   try {
+    // Get the current user
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      throw new Error('User not authenticated');
+    }
+
     const { data, error } = await supabase.from('conversations')
       .insert({
         title,
         model,
-        is_shared: false
+        is_shared: false,
+        user_id: user.id
       })
       .select()
       .single();
@@ -38,7 +45,7 @@ export const createConversation = async (title: string, model: string, messages:
         conversation_id: conversationId,
         role: msg.role,
         content: msg.content,
-        timestamp: msg.timestamp
+        timestamp: msg.timestamp.toISOString() // Convert Date to ISO string
       }));
     
     if (messageInserts.length > 0) {
@@ -60,8 +67,12 @@ export const createConversation = async (title: string, model: string, messages:
 // Get all conversations for the current user
 export const getUserConversations = async (): Promise<Conversation[]> => {
   try {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return [];
+
     const { data, error } = await supabase.from('conversations')
       .select('*')
+      .eq('user_id', user.id)
       .order('updated_at', { ascending: false });
     
     if (error) throw error;
@@ -97,7 +108,7 @@ export const getConversationWithMessages = async (id: string): Promise<{conversa
       role: msg.role as 'user' | 'assistant' | 'system',
       content: msg.content,
       timestamp: new Date(msg.timestamp),
-      feedback: msg.feedback
+      feedback: msg.feedback as 'positive' | 'negative' | undefined
     }));
     
     return { conversation, messages };
@@ -133,7 +144,7 @@ export const getSharedConversation = async (shareId: string): Promise<{conversat
       role: msg.role as 'user' | 'assistant' | 'system',
       content: msg.content,
       timestamp: new Date(msg.timestamp),
-      feedback: msg.feedback
+      feedback: msg.feedback as 'positive' | 'negative' | undefined
     }));
     
     return { conversation, messages };
@@ -147,7 +158,10 @@ export const getSharedConversation = async (shareId: string): Promise<{conversat
 export const updateConversationTitle = async (id: string, title: string): Promise<boolean> => {
   try {
     const { error } = await supabase.from('conversations')
-      .update({ title, updated_at: new Date() })
+      .update({ 
+        title, 
+        updated_at: new Date().toISOString() 
+      })
       .eq('id', id);
     
     if (error) throw error;
@@ -161,12 +175,13 @@ export const updateConversationTitle = async (id: string, title: string): Promis
 // Toggle sharing for a conversation
 export const toggleConversationSharing = async (id: string, isCurrentlyShared: boolean): Promise<{success: boolean, shareId?: string}> => {
   try {
-    const updates = isCurrentlyShared 
-      ? { is_shared: false, share_id: null } 
-      : { is_shared: true };
+    const share_id = !isCurrentlyShared ? uuidv4() : null;
     
     const { data, error } = await supabase.from('conversations')
-      .update(updates)
+      .update({ 
+        is_shared: !isCurrentlyShared, 
+        share_id 
+      })
       .eq('id', id)
       .select()
       .single();
@@ -195,14 +210,14 @@ export const addMessageToConversation = async (conversationId: string, message: 
         conversation_id: conversationId,
         role: message.role,
         content: message.content,
-        timestamp: message.timestamp
+        timestamp: message.timestamp.toISOString() // Convert Date to ISO string
       });
     
     if (error) throw error;
     
     // Update the conversation's updated_at timestamp
     await supabase.from('conversations')
-      .update({ updated_at: new Date() })
+      .update({ updated_at: new Date().toISOString() })
       .eq('id', conversationId);
     
     return true;

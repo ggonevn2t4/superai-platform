@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import ChatHeader from './ChatHeader';
@@ -6,7 +5,7 @@ import ChatInput from './ChatInput';
 import ChatMessages from './ChatMessages';
 import ChatSettings from './ChatSettings';
 import ChatShareHeader from './ChatShareHeader';
-import { useChatState } from '@/hooks/useChatState';
+import { useChatState, Message } from '@/hooks/useChatState';
 import { useAuth } from '@/context/AuthContext';
 import { createConversation, getConversationWithMessages, getSharedConversation, toggleConversationSharing, updateConversationTitle, getUserConversations } from '@/services/conversationService';
 import { toast } from 'sonner';
@@ -14,15 +13,19 @@ import { toast } from 'sonner';
 interface ChatInterfaceProps {
   readOnly?: boolean;
   initialContext?: string | null;
+  initialMessages?: Message[];
+  initialConversationId?: string | null;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
   readOnly = false,
-  initialContext = null 
+  initialContext = null,
+  initialMessages = [],
+  initialConversationId = null
 }) => {
   const navigate = useNavigate();
-  const { shareId } = useParams<{ shareId: string }>();
-  const [isLoadingConversation, setIsLoadingConversation] = useState(shareId ? true : false);
+  const { conversationId } = useParams<{ conversationId: string }>();
+  const [isLoadingConversation, setIsLoadingConversation] = useState(conversationId ? true : false);
   const [model, setModel] = useState('deepseek-x');
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(2048);
@@ -32,43 +35,66 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   const [conversationTitle, setConversationTitle] = useState('Cuộc trò chuyện mới');
   const [isShared, setIsShared] = useState(false);
   
-  const [initialMessages, setInitialMessages] = useState([]);
-  const [initialConversationId, setInitialConversationId] = useState<string | null>(null);
+  // Use directly provided initialMessages and initialConversationId if available
+  const initialMsgs = initialMessages.length > 0 ? initialMessages : [];
+  const initialConvId = initialConversationId || null;
   
   const { messages, isLoading, sendMessage, clear, activeConversationId, setConversation } = useChatState({
     initialContext,
-    initialMessages,
-    conversationId: initialConversationId
+    initialMessages: initialMsgs,
+    conversationId: initialConvId
   });
   
   const { user } = useAuth();
   
-  // Load shared conversation if shareId is provided
+  // Load conversation if conversationId is provided and no initialMessages
   useEffect(() => {
-    const loadSharedConversation = async () => {
-      if (!shareId) return;
+    const loadConversation = async () => {
+      if (!conversationId || initialMessages.length > 0) return;
       
       setIsLoadingConversation(true);
-      const { conversation, messages } = await getSharedConversation(shareId);
+      const { conversation, messages } = await getConversationWithMessages(conversationId);
       
       if (conversation && messages.length > 0) {
         setModel(conversation.model);
         setConversationTitle(conversation.title);
         setIsShared(conversation.is_shared);
-        setInitialMessages(messages);
-        setInitialConversationId(conversation.id);
+        setConversation(conversation.id, messages);
       } else {
-        toast.error('Không tìm thấy cuộc trò chuyện được chia sẻ');
+        toast.error('Không tìm thấy cuộc trò chuyện');
         navigate('/chat');
       }
       
       setIsLoadingConversation(false);
     };
     
-    if (shareId) {
-      loadSharedConversation();
+    if (conversationId) {
+      loadConversation();
     }
-  }, [shareId, navigate]);
+  }, [conversationId, navigate, setConversation, initialMessages.length]);
+  
+  // Set title and shared status from initialConversationId if available
+  useEffect(() => {
+    if (initialConversationId && initialMessages.length > 0) {
+      const loadConversationDetails = async () => {
+        try {
+          const { data, error } = await supabase.from('conversations')
+            .select('title, is_shared')
+            .eq('id', initialConversationId)
+            .single();
+            
+          if (!error && data) {
+            setConversationTitle(data.title);
+            setIsShared(data.is_shared);
+          }
+        } catch (err) {
+          console.error('Error loading conversation details:', err);
+        }
+      };
+      
+      loadConversationDetails();
+    }
+  }, [initialConversationId, initialMessages.length]);
   
   const handleMessageFeedback = (messageId: string, type: 'positive' | 'negative') => {
     // Handle message feedback logic
@@ -119,7 +145,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     if (conversationId) {
       setConversation(conversationId, messages);
       // Navigate to the saved conversation
-      if (!shareId) { // Only redirect if not already in a shared view
+      if (!conversationId) { // Only redirect if not already in a shared view
         navigate(`/chat`);
       }
     }
