@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, X, CreditCard, Zap, Star } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import PaymentForm from '@/components/payment/PaymentForm';
 
 const pricingPlans = [
   {
@@ -75,6 +76,12 @@ const pricingPlans = [
 const PricingPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [selectedPlan, setSelectedPlan] = useState<null | {
+    name: string;
+    price: string;
+    description: string;
+  }>(null);
+  const [showPaymentForm, setShowPaymentForm] = useState(false);
 
   const handlePlanSelect = (planName: string) => {
     if (!user) {
@@ -86,11 +93,15 @@ const PricingPage: React.FC = () => {
     if (planName === 'Free') {
       toast.success('Bạn đã đăng ký gói Free thành công!');
     } else if (planName === 'Pro') {
-      toast.info('Đang chuyển đến trang thanh toán...');
-      // Simulating payment process
-      setTimeout(() => {
-        toast('Chức năng thanh toán đang được phát triển');
-      }, 1500);
+      const plan = pricingPlans.find(p => p.name === planName);
+      if (plan) {
+        setSelectedPlan({
+          name: planName,
+          price: plan.price,
+          description: plan.description
+        });
+        setShowPaymentForm(true);
+      }
     } else {
       toast.info('Chúng tôi sẽ liên hệ với bạn sớm!');
     }
@@ -173,6 +184,19 @@ const PricingPage: React.FC = () => {
             </Card>
           ))}
         </div>
+
+        {selectedPlan && (
+          <PaymentForm 
+            planName={selectedPlan.name}
+            planPrice={selectedPlan.price}
+            planDescription={selectedPlan.description}
+            isOpen={showPaymentForm}
+            onClose={() => {
+              setShowPaymentForm(false);
+              setSelectedPlan(null);
+            }}
+          />
+        )}
 
         <div className="mt-16 max-w-3xl mx-auto text-center">
           <h2 className="text-2xl font-bold mb-6">Câu hỏi thường gặp</h2>
