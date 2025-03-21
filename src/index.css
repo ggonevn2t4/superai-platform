@@ -111,11 +111,14 @@
   
   html {
     scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
   }
   
   body {
     @apply bg-background text-foreground antialiased;
     font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    touch-action: manipulation;
+    overflow-x: hidden;
   }
 }
 
@@ -151,7 +154,7 @@
   }
   
   .superai-input {
-    @apply flex h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply flex h-10 md:h-12 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background transition-colors file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50;
   }
   
   .scrollbar-none {
@@ -178,6 +181,23 @@
   .animation-delay-400 {
     animation-delay: 0.4s;
   }
+  
+  /* Mobile optimizations */
+  .mobile-container {
+    @apply px-3 md:px-4;
+  }
+  
+  .mobile-text {
+    @apply text-sm md:text-base;
+  }
+  
+  .mobile-heading {
+    @apply text-lg md:text-xl lg:text-2xl;
+  }
+  
+  .mobile-touch-target {
+    @apply min-h-[44px] min-w-[44px];
+  }
 }
 
 #root {
@@ -190,8 +210,8 @@
 
 /* Improve the scrollbar appearance */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 4px;
+  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -205,4 +225,20 @@
 
 ::-webkit-scrollbar-thumb:hover {
   background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Media queries for better responsiveness */
+@media (max-width: 640px) {
+  .chat-container {
+    height: calc(100vh - 12rem) !important;
+    max-height: none !important;
+  }
+  
+  button, .button, [role="button"] {
+    min-height: 40px;
+  }
+  
+  input, textarea, select {
+    font-size: 16px !important; /* Prevents iOS zoom on focus */
+  }
 }
