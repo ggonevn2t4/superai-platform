@@ -12,8 +12,7 @@ import {
   DialogFooter,
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bank, Copy, Smartphone, Check, ArrowRight } from 'lucide-react';
-import Image from 'react-image';
+import { BuildingBank, Copy, Smartphone, Check, ArrowRight } from 'lucide-react';
 import { 
   initiateBankTransfer, 
   initiateMomoPayment, 
@@ -231,7 +230,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({
             <Tabs defaultValue="bank_transfer" onValueChange={(value) => setPaymentMethod(value as 'bank_transfer' | 'momo')}>
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="bank_transfer" className="flex items-center gap-2">
-                  <Bank className="h-4 w-4" />
+                  <BuildingBank className="h-4 w-4" />
                   <span>Chuyển khoản</span>
                 </TabsTrigger>
                 <TabsTrigger value="momo" className="flex items-center gap-2">
