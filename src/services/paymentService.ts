@@ -7,6 +7,7 @@ interface PaymentMethod {
   phoneNumber?: string;
   accountName: string;
   instructions: string;
+  qrCodeUrl?: string;
 }
 
 interface PaymentMethods {
@@ -38,7 +39,7 @@ export async function getPaymentMethods(): Promise<PaymentMethods | null> {
   try {
     const { data, error } = await supabase.functions.invoke('payment-gateway', {
       method: 'GET',
-      path: 'methods',
+      body: { action: 'methods' }
     });
 
     if (error) throw error;
@@ -53,8 +54,7 @@ export async function initiatePayment(params: InitiatePaymentParams): Promise<Pa
   try {
     const { data, error } = await supabase.functions.invoke('payment-gateway', {
       method: 'POST',
-      path: 'initiate',
-      body: params,
+      body: { action: 'initiate', ...params }
     });
 
     if (error) throw error;
@@ -69,8 +69,7 @@ export async function verifyPayment(referenceCode: string): Promise<{ success: b
   try {
     const { data, error } = await supabase.functions.invoke('payment-gateway', {
       method: 'POST',
-      path: 'verify',
-      body: { referenceCode },
+      body: { action: 'verify', referenceCode }
     });
 
     if (error) throw error;

@@ -6,10 +6,11 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Bank, Smartphone, Copy, ArrowRight, Check } from 'lucide-react';
+import { BuildingBank, Smartphone, Copy, ArrowRight, Check, QrCode } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface PaymentFormProps {
   planName: string;
@@ -23,6 +24,7 @@ interface PaymentMethod {
   phoneNumber?: string;
   accountName: string;
   instructions: string;
+  qrCodeUrl?: string;
 }
 
 const PaymentForm: React.FC<PaymentFormProps> = ({ planName, planPrice, onSuccess }) => {
@@ -111,7 +113,7 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ planName, planPrice, onSucces
           <Tabs defaultValue="bank" onValueChange={(value) => setSelectedMethod(value as 'bank' | 'momo')}>
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="bank" className="flex items-center gap-2">
-                <Bank size={16} />
+                <BuildingBank size={16} />
                 <span>Ngân hàng</span>
               </TabsTrigger>
               <TabsTrigger value="momo" className="flex items-center gap-2">
@@ -198,6 +200,24 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ planName, planPrice, onSucces
                 </div>
                 <p className="text-xs text-muted-foreground">Lưu mã này để kiểm tra trạng thái thanh toán sau này</p>
               </div>
+              
+              {paymentDetails.qrCodeUrl && selectedMethod === 'momo' && (
+                <div className="flex flex-col items-center bg-pink-50 dark:bg-pink-950/20 rounded-lg p-4 border border-pink-200 dark:border-pink-900">
+                  <h3 className="text-center font-semibold mb-2">Quét mã QR để thanh toán</h3>
+                  <div className="w-full max-w-[250px] mx-auto mb-3">
+                    <AspectRatio ratio={1/1} className="bg-white rounded-md overflow-hidden">
+                      <img 
+                        src={paymentDetails.qrCodeUrl} 
+                        alt="MoMo QR Code" 
+                        className="w-full h-full object-contain p-1"
+                      />
+                    </AspectRatio>
+                  </div>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Sử dụng ứng dụng MoMo hoặc ngân hàng để quét mã QR này
+                  </p>
+                </div>
+              )}
               
               <div className="rounded-lg border p-4 space-y-3">
                 <div className="flex justify-between">
@@ -286,9 +306,9 @@ const PaymentForm: React.FC<PaymentFormProps> = ({ planName, planPrice, onSucces
             <Button 
               variant="default" 
               className="gap-1"
-              onClick={() => navigate('/dashboard')}
+              onClick={() => navigate('/payment/verify')}
             >
-              <span>Đến trang quản lý</span>
+              <span>Kiểm tra trạng thái</span>
               <ArrowRight size={16} />
             </Button>
           </DialogFooter>
