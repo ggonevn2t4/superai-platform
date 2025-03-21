@@ -40,8 +40,8 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
     <div className="flex items-center justify-between mb-4">
       <div className="flex items-center gap-2">
         <ModelSelector 
-          value={model} 
-          onValueChange={setModel} 
+          defaultModel={model} 
+          onChange={setModel} 
           disabled={isLoading || isReadOnly}
         />
       </div>
