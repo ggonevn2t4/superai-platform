@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText, Shield, BookText, LightbulbIcon } from 'lucide-react';
+import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText, Shield, BookText, LightbulbIcon, Tag } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
@@ -57,6 +57,7 @@ const Sidebar: React.FC = () => {
     { icon: <SearchCode size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Trình duyệt', path: '/browser' },
     { icon: <Sparkles size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Sáng tạo', path: '/creative' },
     { icon: <Layers size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Wisebase', path: '/wisebase' },
+    { icon: <Tag size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Bảng giá', path: '/pricing' },
     { icon: <FileText size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Blog', path: '/blog' },
     { icon: <Info size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Giới thiệu', path: '/about' },
     { icon: <BookOpen size={isMobile ? 18 : 20} className="transition-all duration-300" />, label: 'Trợ giúp', path: '/help' },

@@ -23,6 +23,7 @@ import BlogPost from "./pages/BlogPost";
 import Tutorials from "./pages/Tutorials";
 import Documentation from "./pages/Documentation";
 import Admin from "./pages/Admin";
+import Pricing from "./pages/Pricing";
 
 const queryClient = new QueryClient();
 
@@ -63,6 +64,7 @@ const App = () => (
               <Route path="/blog/:slug" element={<BlogPost />} />
               <Route path="/tutorials" element={<Tutorials />} />
               <Route path="/documentation" element={<Documentation />} />
+              <Route path="/pricing" element={<Pricing />} />
               <Route path="/admin" element={
                 <ProtectedRoute>
                   <Admin />
