@@ -22,8 +22,10 @@ export interface UseChatStateProps {
 export interface ChatState {
   messages: Message[];
   isLoading: boolean;
-  sendMessage: (content: string, imageBase64?: string) => Promise<void>;
+  sendMessage: (content: string, imageBase64?: string, customModel?: string) => Promise<void>;
   clear: () => void;
   activeConversationId: string | null;
   setConversation: (id: string | null, newMessages: Message[]) => void;
+  model: string;
+  setModel: (model: string) => void;
 }

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 
 export function useChatSettings() {
-  const [model, setModel] = useState('deepseek-x');
+  const [model, setModel] = useState('deepseek-r1');
   const [temperature, setTemperature] = useState(0.7);
   const [maxTokens, setMaxTokens] = useState(2048);
   const [filterResult, setFilterResult] = useState(true);
