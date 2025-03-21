@@ -1,7 +1,6 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Bot, BookOpen, Video, Play, ChevronRight, FileText, GraduationCap, Star } from 'lucide-react';
+import { Bot, BookOpen, Video, Play, ChevronRight, FileText, GraduationCap, Star, Clock } from 'lucide-react';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';

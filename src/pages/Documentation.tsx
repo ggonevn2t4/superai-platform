@@ -1,7 +1,6 @@
-
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import { Search, FileText, BookOpen, Code, Server, Layers, ArrowRight, ChevronRight, ExternalLink, Copy } from 'lucide-react';
+import { Search, FileText, BookOpen, Code, Server, Layers, ArrowRight, ChevronRight, ExternalLink, Copy, MessageCircle, Paintbrush, Database, Wrench, Zap, Info, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
