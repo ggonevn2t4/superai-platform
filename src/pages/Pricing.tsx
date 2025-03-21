@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Check, X, CreditCard, Zap, Star } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,8 @@ import {
 import { useAuth } from '@/context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import PaymentForm from '@/components/payment/PaymentForm';
 
 const pricingPlans = [
   {
@@ -75,8 +77,10 @@ const pricingPlans = [
 const PricingPage: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState<{name: string, price: string} | null>(null);
 
-  const handlePlanSelect = (planName: string) => {
+  const handlePlanSelect = (planName: string, planPrice: string) => {
     if (!user) {
       toast.info('Bạn cần đăng nhập để tiếp tục');
       navigate('/auth');
@@ -86,14 +90,16 @@ const PricingPage: React.FC = () => {
     if (planName === 'Free') {
       toast.success('Bạn đã đăng ký gói Free thành công!');
     } else if (planName === 'Pro') {
-      toast.info('Đang chuyển đến trang thanh toán...');
-      // Simulating payment process
-      setTimeout(() => {
-        toast('Chức năng thanh toán đang được phát triển');
-      }, 1500);
+      setSelectedPlan({name: planName, price: planPrice});
+      setShowPaymentDialog(true);
     } else {
       toast.info('Chúng tôi sẽ liên hệ với bạn sớm!');
     }
+  };
+
+  const handlePaymentSuccess = () => {
+    setShowPaymentDialog(false);
+    // You can add additional logic here such as updating user subscription status
   };
 
   return (
@@ -163,7 +169,7 @@ const PricingPage: React.FC = () => {
               </CardContent>
               <CardFooter>
                 <Button
-                  onClick={() => handlePlanSelect(plan.name)}
+                  onClick={() => handlePlanSelect(plan.name, plan.price)}
                   className={`w-full ${plan.popular ? '' : 'bg-secondary hover:bg-secondary/90'}`}
                   variant={plan.popular ? 'default' : 'secondary'}
                 >
@@ -189,9 +195,25 @@ const PricingPage: React.FC = () => {
               <h3 className="font-semibold text-lg mb-2">Tôi có thể hủy gói dịch vụ bất kỳ lúc nào không?</h3>
               <p className="text-gray-600">Có, bạn có thể hủy gói dịch vụ bất kỳ lúc nào. Đối với gói Pro, bạn sẽ vẫn có quyền truy cập đến hết chu kỳ thanh toán hiện tại.</p>
             </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Làm thế nào để kiểm tra trạng thái thanh toán?</h3>
+              <p className="text-gray-600">Sau khi thanh toán, bạn sẽ nhận được mã tham chiếu thanh toán. Bạn có thể sử dụng mã này để <a href="/payment/verify" className="text-primary hover:underline">kiểm tra trạng thái thanh toán</a> của mình.</p>
+            </div>
           </div>
         </div>
       </div>
+
+      <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
+        <DialogContent className="sm:max-w-md">
+          {selectedPlan && (
+            <PaymentForm 
+              planName={selectedPlan.name} 
+              planPrice={selectedPlan.price} 
+              onSuccess={handlePaymentSuccess} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Layout>
   );
 };
