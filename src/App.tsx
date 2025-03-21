@@ -19,6 +19,8 @@ import WiseBase from "./pages/WiseBase";
 import Help from "./pages/Help";
 import About from "./pages/About";
 import Blog from "./pages/Blog";
+import Tutorials from "./pages/Tutorials";
+import Documentation from "./pages/Documentation";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +57,8 @@ const App = () => (
               <Route path="/help" element={<Help />} />
               <Route path="/about" element={<About />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/tutorials" element={<Tutorials />} />
+              <Route path="/documentation" element={<Documentation />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
