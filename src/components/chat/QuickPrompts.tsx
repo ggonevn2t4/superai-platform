@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LightbulbIcon, BookTextIcon, SparklesIcon, MessagesSquareIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -8,8 +8,10 @@ interface QuickPromptsProps {
   onSelectPrompt: (prompt: string) => void;
 }
 
-const QuickPrompts: React.FC<QuickPromptsProps> = ({ onSelectPrompt }) => {
-  const generalPrompts = [
+const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ onSelectPrompt }) => {
+  
+  // Memoize the prompt arrays to prevent unnecessary recreations
+  const generalPrompts = useMemo(() => [
     "Giải thích X như thể tôi 5 tuổi",
     "Viết một email chuyên nghiệp về",
     "Tóm tắt văn bản này",
@@ -17,23 +19,47 @@ const QuickPrompts: React.FC<QuickPromptsProps> = ({ onSelectPrompt }) => {
     "Phân tích dữ liệu này",
     "Tạo kế hoạch cho",
     "So sánh A và B"
-  ];
+  ], []);
   
-  const creativePrompts = [
+  const creativePrompts = useMemo(() => [
     "Viết một bài thơ ngắn về",
     "Kể một câu chuyện về",
     "Tạo một trò chơi với chủ đề",
     "Thiết kế một nhân vật cho",
     "Viết một kịch bản hội thoại về"
-  ];
+  ], []);
   
-  const professionalPrompts = [
+  const professionalPrompts = useMemo(() => [
     "Tạo bản tóm tắt báo cáo về",
     "Phân tích SWOT cho",
     "Viết mô tả sản phẩm cho",
     "Tạo kế hoạch tiếp thị cho",
     "Soạn bài thuyết trình về"
-  ];
+  ], []);
+  
+  // Memoize the rendering of prompt buttons to prevent unnecessary re-renders
+  const renderPromptButtons = useMemo(() => (
+    prompts: string[]
+  ) => (
+    <div className="flex flex-wrap gap-2">
+      {prompts.map((prompt, index) => (
+        <Button
+          key={index}
+          variant="outline"
+          size="sm"
+          className="text-xs bg-background/50 hover:bg-background"
+          onClick={() => onSelectPrompt(prompt)}
+        >
+          {prompt}
+        </Button>
+      ))}
+    </div>
+  ), [onSelectPrompt]);
+  
+  // Optimize tab rendering with memoization
+  const generalTabContent = useMemo(() => renderPromptButtons(generalPrompts), [renderPromptButtons, generalPrompts]);
+  const creativeTabContent = useMemo(() => renderPromptButtons(creativePrompts), [renderPromptButtons, creativePrompts]);
+  const professionalTabContent = useMemo(() => renderPromptButtons(professionalPrompts), [renderPromptButtons, professionalPrompts]);
   
   return (
     <div className="my-4 animate-fade-in">
@@ -59,51 +85,15 @@ const QuickPrompts: React.FC<QuickPromptsProps> = ({ onSelectPrompt }) => {
         </TabsList>
         
         <TabsContent value="general" className="mt-0">
-          <div className="flex flex-wrap gap-2">
-            {generalPrompts.map((prompt, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="text-xs bg-background/50 hover:bg-background"
-                onClick={() => onSelectPrompt(prompt)}
-              >
-                {prompt}
-              </Button>
-            ))}
-          </div>
+          {generalTabContent}
         </TabsContent>
         
         <TabsContent value="creative" className="mt-0">
-          <div className="flex flex-wrap gap-2">
-            {creativePrompts.map((prompt, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="text-xs bg-background/50 hover:bg-background"
-                onClick={() => onSelectPrompt(prompt)}
-              >
-                {prompt}
-              </Button>
-            ))}
-          </div>
+          {creativeTabContent}
         </TabsContent>
         
         <TabsContent value="professional" className="mt-0">
-          <div className="flex flex-wrap gap-2">
-            {professionalPrompts.map((prompt, index) => (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                className="text-xs bg-background/50 hover:bg-background"
-                onClick={() => onSelectPrompt(prompt)}
-              >
-                {prompt}
-              </Button>
-            ))}
-          </div>
+          {professionalTabContent}
         </TabsContent>
       </Tabs>
       
@@ -127,6 +117,8 @@ const QuickPrompts: React.FC<QuickPromptsProps> = ({ onSelectPrompt }) => {
       </div>
     </div>
   );
-};
+});
+
+QuickPrompts.displayName = 'QuickPrompts';
 
 export default QuickPrompts;

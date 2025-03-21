@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, useEffect, memo } from 'react';
 import ChatInput from './ChatInput';
 import AdvancedModelOptions from './AdvancedModelOptions';
 import QuickPrompts from './QuickPrompts';
@@ -19,7 +19,7 @@ interface ChatFormProps {
   setFilterResult: (value: boolean) => void;
 }
 
-const ChatForm: React.FC<ChatFormProps> = ({
+const ChatForm: React.FC<ChatFormProps> = memo(({
   isLoading,
   handleSubmit,
   apiKeyError,
@@ -37,39 +37,46 @@ const ChatForm: React.FC<ChatFormProps> = ({
   const [toggleAdvancedOptions, setToggleAdvancedOptions] = useState(showAdvancedOptions);
   const [showQuickPrompts, setShowQuickPrompts] = useState(false);
   
-  const toggleOptions = () => {
-    setToggleAdvancedOptions(!toggleAdvancedOptions);
-  };
+  const toggleOptions = useCallback(() => {
+    setToggleAdvancedOptions(prev => !prev);
+  }, []);
   
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = useCallback((e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim()) {
       handleSubmit(e);
       setInput('');
       setShowQuickPrompts(false);
     }
-  };
+  }, [input, handleSubmit]);
   
-  const handleSelectPrompt = (prompt: string) => {
+  const handleSelectPrompt = useCallback((prompt: string) => {
     setInput(prompt);
     setShowQuickPrompts(false);
     // Focus vào input sau khi chọn prompt
-    const textarea = document.querySelector('textarea');
-    if (textarea) {
-      textarea.focus();
-    }
-  };
+    requestAnimationFrame(() => {
+      const textarea = document.querySelector('textarea');
+      if (textarea) {
+        textarea.focus();
+      }
+    });
+  }, []);
   
   const charCount = input.length;
   
   // Hiển thị gợi ý nhanh khi input trống và không đang tải
-  React.useEffect(() => {
+  useEffect(() => {
     if (!input && !isLoading && !isReadOnly) {
       setShowQuickPrompts(true);
     } else {
       setShowQuickPrompts(false);
     }
   }, [input, isLoading, isReadOnly]);
+  
+  // Update toggled options when prop changes
+  useEffect(() => {
+    setToggleAdvancedOptions(showAdvancedOptions);
+  }, [showAdvancedOptions]);
   
   return (
     <div className="p-4 border-t">
@@ -103,6 +110,8 @@ const ChatForm: React.FC<ChatFormProps> = ({
       />
     </div>
   );
-};
+});
+
+ChatForm.displayName = 'ChatForm';
 
 export default ChatForm;

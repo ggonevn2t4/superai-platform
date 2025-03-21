@@ -7,23 +7,33 @@ interface CacheItem<T> {
   value: T;
   timestamp: number;
   expiresIn: number; // milliseconds
+  lastAccessed: number; // For LRU implementation
 }
 
 class CacheService {
   private cache: Map<string, CacheItem<any>> = new Map();
   private maxSize: number = 100; // Maximum number of items to store in cache
+  private cleanupInterval: number | null = null;
+  
+  constructor() {
+    // Set up automatic cleanup interval (every 5 minutes)
+    if (typeof window !== 'undefined') {
+      this.cleanupInterval = window.setInterval(() => this.cleanExpired(), 5 * 60 * 1000);
+    }
+  }
   
   // Set an item in the cache with an expiration time
   set<T>(key: string, value: T, expiresIn: number = 5 * 60 * 1000): void {
     // If cache is at capacity, remove oldest items
     if (this.cache.size >= this.maxSize) {
-      this.removeOldestItems(Math.floor(this.maxSize * 0.2)); // Remove 20% oldest items
+      this.removeLeastRecentlyUsed(Math.floor(this.maxSize * 0.2)); // Remove 20% least used items
     }
     
     this.cache.set(key, {
       value,
       timestamp: Date.now(),
-      expiresIn
+      expiresIn,
+      lastAccessed: Date.now()
     });
   }
   
@@ -39,6 +49,9 @@ class CacheService {
       return null;
     }
     
+    // Update last accessed time for LRU implementation
+    item.lastAccessed = Date.now();
+    
     return item.value as T;
   }
   
@@ -52,6 +65,9 @@ class CacheService {
       this.cache.delete(key);
       return false;
     }
+    
+    // Update last accessed time for LRU implementation
+    item.lastAccessed = Date.now();
     
     return true;
   }
@@ -68,8 +84,14 @@ class CacheService {
   
   // Generate a cache key for API requests
   generateCacheKey(endpoint: string, params: any): string {
-    const paramsString = JSON.stringify(params);
-    return `${endpoint}:${paramsString}`;
+    try {
+      const paramsString = JSON.stringify(params);
+      return `${endpoint}:${paramsString}`;
+    } catch (error) {
+      // If JSON.stringify fails (e.g., circular references), use a fallback
+      console.warn('Failed to generate cache key with JSON.stringify', error);
+      return `${endpoint}:${Date.now()}`;
+    }
   }
   
   // Remove expired items from the cache
@@ -82,10 +104,10 @@ class CacheService {
     }
   }
   
-  // Remove oldest items when cache is full
-  private removeOldestItems(count: number): void {
+  // Remove least recently used items when cache is full (LRU algorithm)
+  private removeLeastRecentlyUsed(count: number): void {
     const items = Array.from(this.cache.entries())
-      .sort((a, b) => a[1].timestamp - b[1].timestamp);
+      .sort((a, b) => a[1].lastAccessed - b[1].lastAccessed);
     
     for (let i = 0; i < Math.min(count, items.length); i++) {
       this.cache.delete(items[i][0]);
@@ -96,8 +118,17 @@ class CacheService {
   setMaxSize(size: number): void {
     this.maxSize = size;
     if (this.cache.size > this.maxSize) {
-      this.removeOldestItems(this.cache.size - this.maxSize);
+      this.removeLeastRecentlyUsed(this.cache.size - this.maxSize);
     }
+  }
+  
+  // Clean up resources when no longer needed
+  destroy(): void {
+    if (this.cleanupInterval !== null && typeof window !== 'undefined') {
+      window.clearInterval(this.cleanupInterval);
+      this.cleanupInterval = null;
+    }
+    this.cache.clear();
   }
 }
 

@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import ChatMessage, { Message } from './ChatMessage';
 import { Loader2 } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
@@ -13,7 +13,7 @@ interface ChatMessagesProps {
 
 const MESSAGES_PER_BATCH = 10;
 
-const ChatMessages: React.FC<ChatMessagesProps> = ({ 
+const ChatMessages: React.FC<ChatMessagesProps> = React.memo(({ 
   messages, 
   onMessageFeedback,
   onSelectSuggestedQuestion,
@@ -23,6 +23,7 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const [visibleMessages, setVisibleMessages] = useState<Message[]>([]);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasScrolledUp, setHasScrolledUp] = useState(false);
   
   // Initialize with the most recent messages
   useEffect(() => {
@@ -33,35 +34,48 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
         : messages.slice(messages.length - MESSAGES_PER_BATCH);
       
       setVisibleMessages(messagesToShow);
+      setHasScrolledUp(false);
     } else {
       setVisibleMessages([]);
     }
   }, [messages]);
   
-  // Scroll to bottom when messages change
+  // Scroll to bottom when new messages arrive, but not when loading older messages
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [visibleMessages]);
+    if (!hasScrolledUp) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [visibleMessages, hasScrolledUp]);
   
   // Load more messages when scrolling to top
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (!containerRef.current) return;
     
-    const { scrollTop } = containerRef.current;
+    const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
     const threshold = 100; // px from top
+    
+    // Detect scroll up
+    if (scrollHeight - scrollTop - clientHeight > 200) {
+      setHasScrolledUp(true);
+    }
+    
+    // If near bottom, mark as not scrolled up
+    if (scrollHeight - scrollTop - clientHeight < 50) {
+      setHasScrolledUp(false);
+    }
     
     if (scrollTop < threshold && visibleMessages.length < messages.length && !isLoadingMore) {
       loadMoreMessages();
     }
-  };
+  }, [messages, visibleMessages, isLoadingMore]);
   
   const loadMoreMessages = async () => {
     if (visibleMessages.length >= messages.length) return;
     
     setIsLoadingMore(true);
     
-    // Simulate network delay for demonstration purposes
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Simulate a short delay to prevent UI jank
+    await new Promise(resolve => setTimeout(resolve, 50));
     
     const currentCount = visibleMessages.length;
     const additionalMessages = messages.slice(
@@ -107,9 +121,13 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
           {displayMessages.map((message) => (
             <motion.div
               key={message.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
+              transition={{ 
+                duration: 0.2, 
+                // Use a faster animation if we have more than 10 messages
+                delay: displayMessages.length > 10 ? 0 : 0.05 
+              }}
             >
               <ChatMessage 
                 message={message} 
@@ -124,6 +142,8 @@ const ChatMessages: React.FC<ChatMessagesProps> = ({
       <div ref={messagesEndRef} />
     </div>
   );
-};
+});
+
+ChatMessages.displayName = 'ChatMessages';
 
 export default ChatMessages;
