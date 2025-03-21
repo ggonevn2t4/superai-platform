@@ -14,6 +14,9 @@ import Tools from "./pages/Tools";
 import NotFound from "./pages/NotFound";
 import SharedChat from "./pages/SharedChat";
 import Browser from "./pages/Browser";
+import Creative from "./pages/Creative";
+import WiseBase from "./pages/WiseBase";
+import Help from "./pages/Help";
 
 const queryClient = new QueryClient();
 
@@ -40,9 +43,9 @@ const App = () => (
                 </ProtectedRoute>
               } />
               <Route path="/browser" element={<Browser />} />
-              <Route path="/creative" element={<NotFound />} />
-              <Route path="/wisebase" element={<NotFound />} />
-              <Route path="/help" element={<NotFound />} />
+              <Route path="/creative" element={<Creative />} />
+              <Route path="/wisebase" element={<WiseBase />} />
+              <Route path="/help" element={<Help />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
