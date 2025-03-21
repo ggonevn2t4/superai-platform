@@ -8,7 +8,14 @@ import ChatSettings from './ChatSettings';
 import ChatShareHeader from './ChatShareHeader';
 import { useChatState, Message } from '@/hooks/useChatState';
 import { useAuth } from '@/context/AuthContext';
-import { createConversation, getConversationWithMessages, getSharedConversation, toggleConversationSharing, updateConversationTitle, getUserConversations } from '@/services/conversationService';
+import { 
+  createConversation, 
+  getConversationWithMessages, 
+  getSharedConversation, 
+  toggleConversationSharing, 
+  updateConversationTitle, 
+  getUserConversations 
+} from '@/services/conversation';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 

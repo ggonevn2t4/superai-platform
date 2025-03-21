@@ -4,7 +4,7 @@ import { useParams } from 'react-router-dom';
 import ChatInterface from '../components/chat/ChatInterface';
 import Layout from '../components/layout/Layout';
 import { MessageSquareText, Bot, Share2, Loader2 } from 'lucide-react';
-import { getSharedConversation } from '@/services/conversationService';
+import { getSharedConversation } from '@/services/conversation';
 import { Message } from '@/hooks/useChatState';
 
 const SharedChat: React.FC = () => {

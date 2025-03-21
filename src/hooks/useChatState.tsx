@@ -5,7 +5,7 @@ import { User } from '@supabase/supabase-js';
 import { useAuth } from '@/context/AuthContext';
 import { analyzeImage } from '@/services/mediaServices';
 import { supabase } from '@/integrations/supabase/client';
-import { addMessageToConversation } from '@/services/conversationService';
+import { addMessageToConversation } from '@/services/conversation';
 import { toast } from 'sonner';
 
 export interface Message {
