@@ -1,9 +1,10 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText } from 'lucide-react';
+import { Bot, SearchCode, Sparkles, Layers, BookOpen, BrainCircuit, MessageSquare, LogOut, User, Menu, X, Info, FileText, Shield } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,6 +24,31 @@ const Sidebar: React.FC = () => {
   const location = useLocation();
   const { user, signOut } = useAuth();
   const isMobile = useIsMobile();
+  const [isAdmin, setIsAdmin] = useState(false);
+  
+  // Check if user is admin
+  useEffect(() => {
+    if (user) {
+      const checkAdminStatus = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+          
+          if (error) throw error;
+          if (data && data.role === 'admin') {
+            setIsAdmin(true);
+          }
+        } catch (error) {
+          console.error('Error checking admin status:', error);
+        }
+      };
+      
+      checkAdminStatus();
+    }
+  }, [user]);
   
   const navItems = [
     { icon: <MessageSquare size={isMobile ? 18 : 20} />, label: 'Chat', path: '/chat' },
@@ -33,6 +59,7 @@ const Sidebar: React.FC = () => {
     { icon: <Info size={isMobile ? 18 : 20} />, label: 'Giới thiệu', path: '/about' },
     { icon: <FileText size={isMobile ? 18 : 20} />, label: 'Blog', path: '/blog' },
     { icon: <BookOpen size={isMobile ? 18 : 20} />, label: 'Trợ giúp', path: '/help' },
+    ...(isAdmin ? [{ icon: <Shield size={isMobile ? 18 : 20} />, label: 'Admin', path: '/admin' }] : []),
   ];
   
   const renderNavItems = () => (
@@ -142,6 +169,14 @@ const Sidebar: React.FC = () => {
                     <User className="mr-2 h-4 w-4" />
                     <span className="truncate">{user.email}</span>
                   </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link to="/admin" className="flex items-center">
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Trang quản trị</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onClick={() => signOut()}>
                     <LogOut className="mr-2 h-4 w-4" />

@@ -82,6 +82,7 @@ export type Database = {
           avatar_url: string | null
           created_at: string
           id: string
+          role: Database["public"]["Enums"]["user_role"]
           updated_at: string
           username: string | null
         }
@@ -89,6 +90,7 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id: string
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
         }
@@ -96,8 +98,42 @@ export type Database = {
           avatar_url?: string | null
           created_at?: string
           id?: string
+          role?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          created_at: string
+          end_date: string | null
+          id: string
+          plan_type: string
+          start_date: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan_type: string
+          start_date?: string
+          status: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          end_date?: string | null
+          id?: string
+          plan_type?: string
+          start_date?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -127,10 +163,13 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      is_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      user_role: "user" | "admin"
     }
     CompositeTypes: {
       [_ in never]: never
