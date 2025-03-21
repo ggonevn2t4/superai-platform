@@ -33,6 +33,43 @@ export const analyzeImage = async (imageBase64: string): Promise<string> => {
   }
 };
 
+// Specific object detection in images
+export const detectObjectsInImage = async (imageBase64: string): Promise<{ 
+  objects: Array<{ label: string; confidence: number }>; 
+  summary: string;
+}> => {
+  try {
+    // Create a hash of the image data for caching
+    const imageHash = imageBase64.substring(0, 100);
+    const cacheKey = cacheService.generateCacheKey('object-detection', { imageHash });
+    
+    // Check cache first
+    const cachedDetection = cacheService.get<{ 
+      objects: Array<{ label: string; confidence: number }>; 
+      summary: string;
+    }>(cacheKey);
+    
+    if (cachedDetection) {
+      console.log('Using cached object detection result');
+      return cachedDetection;
+    }
+    
+    const { data, error } = await supabase.functions.invoke('detect-objects', {
+      body: { imageBase64 },
+    });
+
+    if (error) throw new Error(error.message);
+    
+    // Cache the result for 30 minutes
+    cacheService.set(cacheKey, data, 30 * 60 * 1000);
+    
+    return data;
+  } catch (error) {
+    console.error('Error detecting objects in image:', error);
+    throw new Error('Không thể nhận dạng đối tượng trong hình ảnh. Vui lòng thử lại sau.');
+  }
+};
+
 // Speech to text with caching
 export const speechToText = async (audioBase64: string): Promise<string> => {
   try {
