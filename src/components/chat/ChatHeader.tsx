@@ -10,7 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { ModelSelector } from "@/components/ui/ModelSelector";
+import ModelSelector from "@/components/ui/ModelSelector";
 import ExportMenu from "@/components/ui/ExportMenu";
 
 interface ChatHeaderProps {
