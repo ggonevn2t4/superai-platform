@@ -1,4 +1,3 @@
-
 import React, { useRef, useEffect, useState } from 'react';
 import { Textarea } from '../../ui/textarea';
 import { FileUploadButton } from './';
@@ -8,6 +7,7 @@ import { SendButton } from './';
 import { ToggleModelButton } from './';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ChatInputContainerProps {
   input: string;
@@ -36,6 +36,7 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
 }) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [isProcessingSpeech, setIsProcessingSpeech] = useState(false);
+  const isMobile = useIsMobile();
   
   const adjustTextareaHeight = () => {
     const textarea = textareaRef.current;
@@ -114,12 +115,15 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
             }}
             onKeyDown={handleKeyDown}
             placeholder={apiKeyError ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
-            className="w-full pl-4 pr-20 py-3 h-12 max-h-[200px] rounded-xl border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
+            className={cn(
+              "w-full pl-4 pr-24 py-3 h-12 max-h-[200px] rounded-xl border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all",
+              isMobile && "pr-28"
+            )}
             disabled={isLoading || isProcessingSpeech}
             rows={1}
           />
           
-          <div className="absolute right-14 top-3 text-xs text-muted-foreground font-medium">
+          <div className="absolute right-24 top-3 text-xs text-muted-foreground font-medium">
             {charCount > 0 && `${charCount} ký tự`}
           </div>
           

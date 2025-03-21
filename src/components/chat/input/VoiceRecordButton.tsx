@@ -106,13 +106,14 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({ onTranscription, 
       onClick={handleRecordingToggle}
       disabled={disabled || isProcessingSpeech}
       className={cn(
-        "absolute right-3 top-3 p-1 rounded-full transition-colors",
+        "absolute right-14 top-3 p-1 rounded-full transition-colors mobile-touch-target",
         isRecording 
           ? "bg-red-100 text-red-600 animate-pulse" 
           : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
         isProcessingSpeech && "animate-spin text-primary"
       )}
       title={isRecording ? "Dừng ghi âm" : isProcessingSpeech ? "Đang xử lý..." : "Ghi âm giọng nói"}
+      aria-label={isRecording ? "Dừng ghi âm" : "Ghi âm giọng nói"}
     >
       {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
     </button>

@@ -32,4 +32,17 @@
   input, textarea, select {
     font-size: 16px !important; /* Prevents iOS zoom on focus */
   }
+  
+  /* Ensure input buttons have enough space between them */
+  .form-input-container .btn-action {
+    margin-right: 12px;
+  }
+}
+
+/* Improved touch targets */
+@media (max-width: 768px) {
+  .mobile-touch-target {
+    min-height: 48px;
+    min-width: 48px;
+  }
 }

@@ -21,13 +21,14 @@ const ToggleModelButton: React.FC<ToggleModelButtonProps> = ({
       variant="ghost"
       size="icon"
       className={cn(
-        "absolute right-2 top-2 hover:bg-accent/60 transition-all",
+        "absolute right-2 top-2 hover:bg-accent/60 transition-all mobile-touch-target",
         showAdvancedOptions && "text-primary bg-accent/80",
         disabled && "opacity-50 cursor-not-allowed"
       )}
       onClick={onClick}
       disabled={disabled}
       title="Cài đặt mô hình"
+      aria-label="Cài đặt mô hình"
     >
       <Settings size={16} />
     </Button>
