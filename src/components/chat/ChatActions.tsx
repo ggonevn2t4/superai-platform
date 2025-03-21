@@ -37,8 +37,25 @@ export const useChatActions = ({
   const { user } = useAuth();
 
   const handleMessageFeedback = (messageId: string, type: 'positive' | 'negative') => {
-    // Handle message feedback logic
-    console.log('Feedback for message', messageId, type);
+    // Update messages with feedback
+    const updatedMessages = messages.map(message => {
+      if (message.id === messageId) {
+        return { ...message, feedback: type };
+      }
+      return message;
+    });
+    
+    // Update conversation with feedback
+    setConversation(activeConversationId, updatedMessages);
+    
+    // Show toast notification
+    toast.success(type === 'positive' 
+      ? 'Cảm ơn bạn đã đánh giá câu trả lời này là hữu ích' 
+      : 'Cảm ơn bạn đã đánh giá. Chúng tôi sẽ cải thiện chất lượng.'
+    );
+    
+    // In a real app, you would send this feedback to your backend
+    console.log('Feedback submitted:', { messageId, type });
   };
 
   const handleSelectSuggestedQuestion = (question: string) => {
@@ -46,24 +63,55 @@ export const useChatActions = ({
     return question;
   };
 
-  const exportChatHistory = () => {
+  const exportChatHistory = (format: 'json' | 'text' | 'markdown' = 'json') => {
     // Export chat history logic
-    const chatExport = {
-      title: conversationTitle,
-      messages: messages.filter(m => m.role !== 'system').map(m => ({
-        role: m.role,
-        content: m.content,
-        timestamp: m.timestamp
-      }))
-    };
+    const filteredMessages = messages.filter(m => m.role !== 'system');
     
-    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(chatExport, null, 2));
+    let content = '';
+    let filename = `${conversationTitle.replace(/\s+/g, '_')}.${format}`;
+    let dataType = '';
+    
+    switch (format) {
+      case 'json':
+        const chatExport = {
+          title: conversationTitle,
+          messages: filteredMessages.map(m => ({
+            role: m.role,
+            content: m.content,
+            timestamp: m.timestamp
+          }))
+        };
+        content = JSON.stringify(chatExport, null, 2);
+        dataType = "application/json";
+        break;
+        
+      case 'text':
+        content = filteredMessages.map(m => 
+          `${m.role === 'assistant' ? 'SuperAI' : 'Bạn'} (${new Date(m.timestamp).toLocaleString()}):\n${m.content}\n\n`
+        ).join('');
+        dataType = "text/plain";
+        break;
+        
+      case 'markdown':
+        content = `# ${conversationTitle}\n\n`;
+        content += filteredMessages.map(m => 
+          `## ${m.role === 'assistant' ? 'SuperAI' : 'Bạn'}\n*${new Date(m.timestamp).toLocaleString()}*\n\n${m.content}\n\n`
+        ).join('');
+        dataType = "text/markdown";
+        break;
+    }
+    
+    const blob = new Blob([content], { type: dataType });
+    const url = URL.createObjectURL(blob);
     const downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href", dataStr);
-    downloadAnchorNode.setAttribute("download", `${conversationTitle.replace(/\s+/g, '_')}.json`);
+    downloadAnchorNode.setAttribute("href", url);
+    downloadAnchorNode.setAttribute("download", filename);
     document.body.appendChild(downloadAnchorNode);
     downloadAnchorNode.click();
     downloadAnchorNode.remove();
+    URL.revokeObjectURL(url);
+    
+    toast.success(`Cuộc trò chuyện đã được xuất định dạng ${format.toUpperCase()}`);
   };
   
   const saveConversation = async () => {

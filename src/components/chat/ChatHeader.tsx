@@ -1,20 +1,27 @@
 
 import React from 'react';
-import { RotateCcw, Download, AlertTriangle } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import ModelSelector from '../ui/ModelSelector';
-import { Button } from '../ui/button';
+import { MoreHorizontal, Trash2, Settings2 } from 'lucide-react';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { ModelSelector } from "@/components/ui/ModelSelector";
+import ExportMenu from "@/components/ui/ExportMenu";
 
 interface ChatHeaderProps {
   model: string;
   setModel: (model: string) => void;
   clearChat: () => void;
-  exportChatHistory: () => void;
+  exportChatHistory: (format?: 'json' | 'text' | 'markdown') => void;
   showAdvancedOptions: boolean;
   setShowAdvancedOptions: (show: boolean) => void;
   isLoading: boolean;
   apiKeyError: boolean;
-  apiProvider?: 'gemini' | 'deepseek' | 'other';
   isReadOnly?: boolean;
 }
 
@@ -27,71 +34,51 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   setShowAdvancedOptions,
   isLoading,
   apiKeyError,
-  apiProvider = 'deepseek',
   isReadOnly = false
 }) => {
   return (
-    <>
-      {apiKeyError && (
-        <div className="bg-amber-50 border-l-4 border-amber-400 p-4 rounded-lg mb-4 animate-fade-in shadow-sm">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <AlertTriangle className="h-5 w-5 text-amber-500" />
-            </div>
-            <div className="ml-3">
-              <p className="text-sm text-amber-800 font-medium">
-                {apiProvider === 'gemini' 
-                  ? 'Quota API Gemini đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'
-                  : apiProvider === 'deepseek'
-                  ? 'Quota API DeepSeek đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'
-                  : 'Quota API đã hết. Vui lòng thử lại sau hoặc cập nhật API key của bạn.'}
-              </p>
-            </div>
-          </div>
-        </div>
-      )}
-      
-      <div className="flex flex-wrap justify-between items-center mb-4 gap-2">
-        <div className="flex items-center gap-2 flex-wrap">
-          <ModelSelector onChange={!isReadOnly ? setModel : () => {}} defaultModel={model} disabled={isReadOnly} />
-          
-          {!isReadOnly && (
-            <>
-              <Button
-                onClick={clearChat}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
-                title="Xóa lịch sử trò chuyện"
-              >
-                <RotateCcw size={16} className="text-primary" />
-                <span className="hidden sm:inline">Làm mới</span>
-              </Button>
-              
-              <Button
-                onClick={exportChatHistory}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-1.5 backdrop-blur-sm bg-background/90 hover:bg-accent/80 transition-all duration-200"
-                title="Xuất lịch sử trò chuyện"
-              >
-                <Download size={16} className="text-primary" />
-                <span className="hidden sm:inline">Xuất</span>
-              </Button>
-            </>
-          )}
-        </div>
-        
-        <div className="text-sm text-muted-foreground font-medium">
-          {isLoading ? (
-            <span className="flex items-center">
-              <span className="inline-block h-2 w-2 rounded-full bg-primary mr-2 animate-pulse"></span>
-              Đang nhập...
-            </span>
-          ) : ''}
-        </div>
+    <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center gap-2">
+        <ModelSelector 
+          value={model} 
+          onValueChange={setModel} 
+          disabled={isLoading || isReadOnly}
+        />
       </div>
-    </>
+      
+      <div className="flex items-center gap-2">
+        {!isReadOnly && (
+          <>
+            <ExportMenu onExport={exportChatHistory} disabled={isLoading} />
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="text-muted-foreground"
+                  disabled={isLoading}
+                >
+                  <MoreHorizontal size={16} />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuLabel>Tùy chọn</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}>
+                  <Settings2 className="mr-2 h-4 w-4" />
+                  <span>Cài đặt nâng cao</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={clearChat}>
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  <span>Xóa cuộc trò chuyện</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </>
+        )}
+      </div>
+    </div>
   );
 };
 

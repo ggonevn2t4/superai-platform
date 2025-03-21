@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles } from 'lucide-react';
+import { Bot, User, CheckCheck, Copy, Smile, Heart, Sparkles, ThumbsUp, ThumbsDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 export interface Message {
@@ -167,9 +167,39 @@ const ChatMessage: React.FC<ChatMessageProps> = ({
             {formatContent(message.content)}
           </div>
           
-          {/* Removed the suggested questions section */}
+          {message.suggestedQuestions && message.suggestedQuestions.length > 0 && (
+            <div className="mt-3 flex flex-wrap gap-2">
+              {message.suggestedQuestions.map((question, index) => (
+                <button
+                  key={index}
+                  onClick={() => onSelectSuggestedQuestion && onSelectSuggestedQuestion(question)}
+                  className="text-xs bg-primary/10 hover:bg-primary/20 text-primary px-3 py-1.5 rounded-full transition-colors"
+                >
+                  {question}
+                </button>
+              ))}
+            </div>
+          )}
           
-          {/* Removed the feedback buttons as requested */}
+          {message.role === 'assistant' && onFeedback && !message.feedback && !message.isError && (
+            <div className="mt-3 flex items-center gap-2">
+              <span className="text-xs text-muted-foreground">Phản hồi:</span>
+              <button
+                onClick={() => onFeedback(message.id, 'positive')}
+                className="p-1.5 rounded-md hover:bg-green-100 text-muted-foreground hover:text-green-600 transition-colors"
+                title="Hữu ích"
+              >
+                <ThumbsUp size={14} />
+              </button>
+              <button
+                onClick={() => onFeedback(message.id, 'negative')}
+                className="p-1.5 rounded-md hover:bg-red-100 text-muted-foreground hover:text-red-600 transition-colors"
+                title="Không hữu ích"
+              >
+                <ThumbsDown size={14} />
+              </button>
+            </div>
+          )}
         </div>
         
         <div className="flex-shrink-0">
