@@ -4,6 +4,7 @@ import { Mic, StopCircle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import { speechToText } from '@/services/mediaServices';
+import { Button } from '@/components/ui/button';
 
 interface VoiceRecordButtonProps {
   onTranscription: (text: string) => void;
@@ -101,22 +102,21 @@ const VoiceRecordButton: React.FC<VoiceRecordButtonProps> = ({ onTranscription, 
   };
   
   return (
-    <button 
+    <Button 
       type="button" 
       onClick={handleRecordingToggle}
       disabled={disabled || isProcessingSpeech}
+      size="icon"
+      variant={isRecording ? "destructive" : "ghost"}
       className={cn(
-        "absolute right-14 top-3 p-1 rounded-full transition-colors mobile-touch-target",
-        isRecording 
-          ? "bg-red-100 text-red-600 animate-pulse" 
-          : "text-muted-foreground hover:text-foreground hover:bg-accent/50",
+        "rounded-full h-10 w-10 flex items-center justify-center",
         isProcessingSpeech && "animate-spin text-primary"
       )}
       title={isRecording ? "Dừng ghi âm" : isProcessingSpeech ? "Đang xử lý..." : "Ghi âm giọng nói"}
       aria-label={isRecording ? "Dừng ghi âm" : "Ghi âm giọng nói"}
     >
-      {isRecording ? <StopCircle size={18} /> : <Mic size={18} />}
-    </button>
+      {isRecording ? <StopCircle size={20} /> : <Mic size={20} />}
+    </Button>
   );
 };
 

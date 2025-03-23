@@ -13,7 +13,7 @@ const SendButton: React.FC<SendButtonProps> = ({ disabled }) => {
       type="submit"
       disabled={disabled}
       className={cn(
-        "absolute right-10 top-2 p-1.5 rounded-full transition-all",
+        "absolute right-3 top-1/2 transform -translate-y-1/2 p-2 rounded-full transition-all",
         disabled
           ? "bg-muted text-muted-foreground" 
           : "bg-primary text-white hover:bg-primary/90",
@@ -21,7 +21,7 @@ const SendButton: React.FC<SendButtonProps> = ({ disabled }) => {
       )}
       title="Gửi tin nhắn"
     >
-      <ArrowUp size={16} />
+      <ArrowUp size={18} />
     </button>
   );
 };

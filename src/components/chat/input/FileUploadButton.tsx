@@ -1,7 +1,8 @@
 
 import React, { useRef } from 'react';
-import { Paperclip } from 'lucide-react';
+import { Paperclip, Globe, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
 
 interface FileUploadButtonProps {
   onFileContent: (content: string, fileName: string) => void;
@@ -49,15 +50,41 @@ const FileUploadButton: React.FC<FileUploadButtonProps> = ({ onFileContent, disa
         accept=".txt,.md,.csv,.json"
       />
       
-      <button
-        type="button"
-        onClick={() => fileInputRef.current?.click()}
-        className="p-3 rounded-lg border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors hover:shadow-sm"
-        title="Tải lên tệp văn bản"
-        disabled={disabled}
-      >
-        <Paperclip size={20} />
-      </button>
+      <div className="flex gap-2">
+        <Button
+          type="button"
+          onClick={() => fileInputRef.current?.click()}
+          size="icon"
+          variant="ghost"
+          className="rounded-full h-10 w-10 flex items-center justify-center"
+          title="Tải lên tệp văn bản"
+          disabled={disabled}
+        >
+          <Paperclip size={20} />
+        </Button>
+        
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="rounded-full h-10 w-10 flex items-center justify-center"
+          title="Tìm kiếm web"
+          disabled={disabled}
+        >
+          <Globe size={20} />
+        </Button>
+        
+        <Button
+          type="button"
+          size="icon"
+          variant="ghost"
+          className="rounded-full h-10 w-10 flex items-center justify-center"
+          title="Công cụ nâng cao"
+          disabled={disabled}
+        >
+          <Sparkles size={20} />
+        </Button>
+      </div>
     </>
   );
 };

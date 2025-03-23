@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ToggleModelButton } from './';
+import { SparklesIcon } from 'lucide-react';
 
 interface ChatInputContainerProps {
   input: string;
@@ -118,22 +119,8 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
   
   return (
     <div className="relative">
-      <div className="flex space-x-2">
-        <div className="flex gap-2">
-          <FileUploadButton 
-            onFileContent={handleFileContent} 
-            disabled={isLoading || isProcessingSpeech} 
-          />
-          
-          <ImageUploadButton 
-            onImageAnalysis={handleImageAnalysis} 
-            disabled={isLoading || isProcessingSpeech} 
-          />
-          
-          <ToggleModelButton onClick={toggleAdvancedOptions} />
-        </div>
-        
-        <div className="flex-1 relative glass">
+      <div className="flex flex-col space-y-3">
+        <div className="relative glass rounded-full w-full">
           <Textarea
             ref={textareaRef}
             value={input}
@@ -141,24 +128,47 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
               setInput(e.target.value);
             }}
             onKeyDown={handleKeyDown}
-            placeholder={apiKeyError ? "Quota API Gemini đã hết. Vui lòng thử model khác." : "Nhập tin nhắn của bạn..."}
-            className="w-full pl-4 pr-20 py-3 h-12 max-h-[200px] rounded-xl border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
+            placeholder={apiKeyError 
+              ? "Quota API Gemini đã hết. Vui lòng thử model khác." 
+              : "Curious? Ask away! 😺"}
+            className="w-full pl-14 pr-14 py-4 min-h-[60px] max-h-[200px] rounded-full border bg-background/50 backdrop-blur-sm focus:outline-none focus:ring-2 focus:ring-primary/50 resize-none transition-all"
             disabled={isLoading || isProcessingSpeech}
             rows={1}
           />
           
-          <div className="absolute right-14 top-3 text-xs text-muted-foreground font-medium">
-            {charCount > 0 && `${charCount} ký tự`}
+          <div className="absolute left-3 top-1/2 transform -translate-y-1/2 flex gap-2">
+            <FileUploadButton 
+              onFileContent={handleFileContent} 
+              disabled={isLoading || isProcessingSpeech} 
+            />
           </div>
           
-          <VoiceRecordButton 
-            onTranscription={handleVoiceTranscription} 
-            disabled={isLoading}
-          />
-          
-          <SendButton 
-            disabled={isLoading || !input.trim() || (apiKeyError && model === 'gemini-2') || isProcessingSpeech}
-          />
+          <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+            <VoiceRecordButton 
+              onTranscription={handleVoiceTranscription} 
+              disabled={isLoading}
+            />
+          </div>
+        </div>
+        
+        <div className="flex justify-center">
+          <div className="flex space-x-2 mx-auto">
+            <button
+              onClick={() => setInput("Tell me amazing black hole facts")}
+              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 rounded-full px-4 py-3 flex items-center gap-2 text-sm"
+            >
+              <span className="text-gray-700 dark:text-gray-300">💬</span>
+              <span className="text-gray-700 dark:text-gray-300">Tell me amazing black hole facts</span>
+            </button>
+            
+            <button
+              onClick={() => setInput("Create image: cozy cyberpunk store")}
+              className="bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200 rounded-full px-4 py-3 flex items-center gap-2 text-sm"
+            >
+              <span className="text-gray-700 dark:text-gray-300">🖼️</span>
+              <span className="text-gray-700 dark:text-gray-300">Create image: cozy cyberpunk store</span>
+            </button>
+          </div>
         </div>
       </div>
       

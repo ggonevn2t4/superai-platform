@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { LightbulbIcon } from 'lucide-react';
+import { SparklesIcon } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ToggleModelButtonProps {
@@ -17,10 +17,10 @@ const ToggleModelButton: React.FC<ToggleModelButtonProps> = ({ onClick }) => {
             type="button"
             size="icon"
             variant="ghost"
-            className="rounded-full h-9 w-9 text-muted-foreground hover:text-foreground"
+            className="rounded-full h-10 w-10 text-primary hover:text-primary hover:bg-primary/10"
             onClick={onClick}
           >
-            <LightbulbIcon size={18} />
+            <SparklesIcon size={20} />
           </Button>
         </TooltipTrigger>
         <TooltipContent side="top">

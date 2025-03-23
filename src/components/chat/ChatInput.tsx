@@ -1,7 +1,6 @@
 
 import React, { useRef, useEffect } from 'react';
 import { ChatInputContainer } from './input';
-import { LightbulbIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface ChatInputProps {
@@ -47,20 +46,7 @@ const ChatInput: React.FC<ChatInputProps> = ({
   }, [input, isLoading]);
   
   return (
-    <div className="relative">
-      <div className="flex items-center mb-2">
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          className="flex items-center text-xs text-muted-foreground"
-          onClick={toggleAdvancedOptions}
-        >
-          <LightbulbIcon size={14} className="mr-1" />
-          Gợi ý nhanh
-        </Button>
-      </div>
-      
+    <div className="relative w-full max-w-3xl mx-auto">
       <form ref={formRef} onSubmit={handleSubmit}>
         <ChatInputContainer
           input={input}
