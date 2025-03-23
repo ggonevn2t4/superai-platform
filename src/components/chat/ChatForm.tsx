@@ -58,14 +58,17 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
   
   const charCount = input.length;
   
-  // Hiển thị gợi ý nhanh khi input trống và không đang tải
+  // Hiển thị menu khi người dùng nhấp vào nút hoặc khi input trống
+  const toggleQuickPrompts = useCallback(() => {
+    setShowQuickPrompts(prev => !prev);
+  }, []);
+  
+  // Tự động ẩn gợi ý khi người dùng nhập nội dung
   useEffect(() => {
-    if (!input && !isLoading && !isReadOnly) {
-      setShowQuickPrompts(true);
-    } else {
+    if (input.trim() && showQuickPrompts) {
       setShowQuickPrompts(false);
     }
-  }, [input, isLoading, isReadOnly]);
+  }, [input, showQuickPrompts]);
   
   return (
     <div className="p-4 border-t">
@@ -82,8 +85,8 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
         charCount={charCount}
         model={model}
         isReadOnly={isReadOnly}
-        showAdvancedOptions={false}
-        toggleAdvancedOptions={() => {}}
+        showAdvancedOptions={showAdvancedOptions}
+        toggleAdvancedOptions={toggleQuickPrompts}
       />
     </div>
   );

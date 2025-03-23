@@ -1,22 +1,34 @@
-import React from 'react';
-import { Settings } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
-// Keeping the component but it will not be used in the UI
+import React from 'react';
+import { Button } from '@/components/ui/button';
+import { LightbulbIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+
 interface ToggleModelButtonProps {
   onClick: () => void;
-  showAdvancedOptions: boolean;
-  disabled?: boolean;
 }
 
-const ToggleModelButton: React.FC<ToggleModelButtonProps> = ({
-  onClick,
-  showAdvancedOptions,
-  disabled = false
-}) => {
-  // This component is now hidden
-  return null;
+const ToggleModelButton: React.FC<ToggleModelButtonProps> = ({ onClick }) => {
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button
+            type="button"
+            size="icon"
+            variant="ghost"
+            className="rounded-full h-9 w-9 text-muted-foreground hover:text-foreground"
+            onClick={onClick}
+          >
+            <LightbulbIcon size={18} />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>Gợi ý nhanh</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
 };
 
 export default ToggleModelButton;

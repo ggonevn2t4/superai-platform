@@ -1,8 +1,9 @@
 
 import React, { useMemo } from 'react';
-import { LightbulbIcon, BookTextIcon, SparklesIcon, MessagesSquareIcon } from 'lucide-react';
+import { LightbulbIcon, BookTextIcon, SparklesIcon, MessagesSquareIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 interface QuickPromptsProps {
   onSelectPrompt: (prompt: string) => void;
@@ -62,60 +63,68 @@ const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(({ onSelectPrompt }
   const professionalTabContent = useMemo(() => renderPromptButtons(professionalPrompts), [renderPromptButtons, professionalPrompts]);
   
   return (
-    <div className="my-4 animate-fade-in">
-      <div className="flex items-center gap-2 mb-2">
-        <LightbulbIcon size={16} className="text-primary" />
-        <h3 className="text-sm font-medium">Gợi ý nhanh</h3>
-      </div>
+    <Collapsible className="my-4 animate-fade-in rounded-md border border-border">
+      <CollapsibleTrigger className="flex w-full items-center justify-between p-3 text-sm hover:bg-accent rounded-md">
+        <div className="flex items-center gap-2">
+          <LightbulbIcon size={16} className="text-primary" />
+          <span className="font-medium">Gợi ý nhanh</span>
+        </div>
+        <div className="text-muted-foreground">
+          <ChevronDownIcon className="h-4 w-4 collapsible-closed" />
+          <ChevronUpIcon className="h-4 w-4 collapsible-open" />
+        </div>
+      </CollapsibleTrigger>
       
-      <Tabs defaultValue="general" className="w-full">
-        <TabsList className="grid grid-cols-3 mb-3 h-8">
-          <TabsTrigger value="general" className="text-xs flex items-center gap-1">
-            <MessagesSquareIcon size={12} />
-            Chung
-          </TabsTrigger>
-          <TabsTrigger value="creative" className="text-xs flex items-center gap-1">
-            <SparklesIcon size={12} />
-            Sáng tạo
-          </TabsTrigger>
-          <TabsTrigger value="professional" className="text-xs flex items-center gap-1">
-            <BookTextIcon size={12} />
-            Chuyên nghiệp
-          </TabsTrigger>
-        </TabsList>
+      <CollapsibleContent className="p-3 pt-0">
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid grid-cols-3 mb-3 h-8">
+            <TabsTrigger value="general" className="text-xs flex items-center gap-1">
+              <MessagesSquareIcon size={12} />
+              Chung
+            </TabsTrigger>
+            <TabsTrigger value="creative" className="text-xs flex items-center gap-1">
+              <SparklesIcon size={12} />
+              Sáng tạo
+            </TabsTrigger>
+            <TabsTrigger value="professional" className="text-xs flex items-center gap-1">
+              <BookTextIcon size={12} />
+              Chuyên nghiệp
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="general" className="mt-0">
+            {generalTabContent}
+          </TabsContent>
+          
+          <TabsContent value="creative" className="mt-0">
+            {creativeTabContent}
+          </TabsContent>
+          
+          <TabsContent value="professional" className="mt-0">
+            {professionalTabContent}
+          </TabsContent>
+        </Tabs>
         
-        <TabsContent value="general" className="mt-0">
-          {generalTabContent}
-        </TabsContent>
-        
-        <TabsContent value="creative" className="mt-0">
-          {creativeTabContent}
-        </TabsContent>
-        
-        <TabsContent value="professional" className="mt-0">
-          {professionalTabContent}
-        </TabsContent>
-      </Tabs>
-      
-      <div className="flex flex-wrap gap-2 mt-3">
-        <Button
-          variant="secondary"
-          size="sm"
-          className="text-xs w-full"
-          onClick={() => onSelectPrompt("Hãy giúp tôi viết một đoạn văn miêu tả cảm xúc về một kỷ niệm đáng nhớ trong cuộc sống.")}
-        >
-          ✨ Viết đoạn văn miêu tả cảm xúc
-        </Button>
-        <Button
-          variant="secondary"
-          size="sm"
-          className="text-xs w-full"
-          onClick={() => onSelectPrompt("Làm thế nào để giải quyết vấn đề [mô tả vấn đề] một cách hiệu quả?")}
-        >
-          🧩 Giải quyết vấn đề
-        </Button>
-      </div>
-    </div>
+        <div className="flex flex-wrap gap-2 mt-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="text-xs w-full"
+            onClick={() => onSelectPrompt("Hãy giúp tôi viết một đoạn văn miêu tả cảm xúc về một kỷ niệm đáng nhớ trong cuộc sống.")}
+          >
+            ✨ Viết đoạn văn miêu tả cảm xúc
+          </Button>
+          <Button
+            variant="secondary"
+            size="sm"
+            className="text-xs w-full"
+            onClick={() => onSelectPrompt("Làm thế nào để giải quyết vấn đề [mô tả vấn đề] một cách hiệu quả?")}
+          >
+            🧩 Giải quyết vấn đề
+          </Button>
+        </div>
+      </CollapsibleContent>
+    </Collapsible>
   );
 });
 

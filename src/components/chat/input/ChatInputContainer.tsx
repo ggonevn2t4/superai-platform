@@ -8,6 +8,7 @@ import { SendButton } from './';
 import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { ToggleModelButton } from './';
 
 interface ChatInputContainerProps {
   input: string;
@@ -49,6 +50,30 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
   useEffect(() => {
     adjustTextareaHeight();
   }, [input]);
+  
+  useEffect(() => {
+    // Add CSS for collapsible components
+    const style = document.createElement('style');
+    style.innerHTML = `
+      .collapsible-closed {
+        display: inline-block;
+      }
+      .collapsible-open {
+        display: none;
+      }
+      [data-state="open"] .collapsible-closed {
+        display: none;
+      }
+      [data-state="open"] .collapsible-open {
+        display: inline-block;
+      }
+    `;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
   
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -92,7 +117,7 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
   }
   
   return (
-    <form onSubmit={handleSubmit} className="relative">
+    <div className="relative">
       <div className="flex space-x-2">
         <div className="flex gap-2">
           <FileUploadButton 
@@ -104,6 +129,8 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
             onImageAnalysis={handleImageAnalysis} 
             disabled={isLoading || isProcessingSpeech} 
           />
+          
+          <ToggleModelButton onClick={toggleAdvancedOptions} />
         </div>
         
         <div className="flex-1 relative glass">
@@ -144,7 +171,7 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
           </div>
         </div>
       )}
-    </form>
+    </div>
   );
 };
 
