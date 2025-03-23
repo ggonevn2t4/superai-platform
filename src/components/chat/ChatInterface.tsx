@@ -72,7 +72,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className="chat-container border rounded-lg overflow-hidden bg-card flex flex-col max-h-[800px] h-[calc(100vh-16rem)]">
-      {!readOnly && (
+      {!readOnly && activeConversationId && (
         <ChatShareHeader 
           isShared={isSharedState}
           conversationTitle={conversationTitleState}
