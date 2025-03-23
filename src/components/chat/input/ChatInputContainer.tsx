@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { ToggleModelButton } from './';
-import { SparklesIcon } from 'lucide-react';
 
 interface ChatInputContainerProps {
   input: string;
@@ -140,6 +139,11 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
             <FileUploadButton 
               onFileContent={handleFileContent} 
               disabled={isLoading || isProcessingSpeech} 
+            />
+            
+            <ImageUploadButton
+              onImageAnalysis={handleImageAnalysis}
+              disabled={isLoading || isProcessingSpeech}
             />
           </div>
           
