@@ -10,6 +10,7 @@ export function useChatPage() {
   const [chatContext, setChatContext] = useState<string | null>(null);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [isLoadingConversations, setIsLoadingConversations] = useState(false);
+  const [model, setModel] = useState('deepseek-r1');
   const { user } = useAuth();
   const navigate = useNavigate();
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -162,6 +163,8 @@ export function useChatPage() {
     isLoadingConversations,
     handleLoadConversation,
     handleDeleteConversation,
-    handleNewChat
+    handleNewChat,
+    model,
+    setModel
   };
 }
