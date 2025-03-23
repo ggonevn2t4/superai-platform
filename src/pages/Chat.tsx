@@ -31,6 +31,7 @@ const Chat: React.FC = () => {
           </div>
         </div>
         
+        {/* ChatContextHeader has been set to return null */}
         <ChatContextHeader chatContext={chatContext} />
         
         <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
