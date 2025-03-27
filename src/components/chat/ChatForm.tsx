@@ -2,6 +2,7 @@
 import React, { useState, useCallback, useEffect, memo } from 'react';
 import ChatInput from './ChatInput';
 import QuickPrompts from './QuickPrompts';
+import { ImageUploadButton } from './input';
 
 interface ChatFormProps {
   isLoading: boolean;
@@ -56,6 +57,12 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
     });
   }, []);
   
+  // Handle image upload result to be included in prompt
+  const handleImageAnalysis = useCallback((analysis: string, fileName: string) => {
+    const imagePrompt = `[Đã tải lên hình ảnh: ${fileName}]\n\nKết quả phân tích:\n${analysis}`;
+    setInput(imagePrompt);
+  }, []);
+  
   const charCount = input.length;
   
   // Hiển thị menu khi người dùng nhấp vào nút hoặc khi input trống
@@ -74,6 +81,17 @@ const ChatForm: React.FC<ChatFormProps> = memo(({
     <div className="p-4 border-t">
       {showQuickPrompts && (
         <QuickPrompts onSelectPrompt={handleSelectPrompt} />
+      )}
+      
+      {!isReadOnly && (
+        <div className="mb-4 flex justify-center">
+          <div className="bg-accent/30 rounded-full p-1.5 backdrop-blur-sm shadow-sm">
+            <ImageUploadButton
+              onImageAnalysis={handleImageAnalysis}
+              disabled={isLoading}
+            />
+          </div>
+        </div>
       )}
       
       <ChatInput

@@ -2,7 +2,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Textarea } from '../../ui/textarea';
 import { FileUploadButton } from './';
-import { ImageUploadButton } from './';
 import { VoiceRecordButton } from './';
 import { SendButton } from './';
 import { cn } from '@/lib/utils';
@@ -97,11 +96,6 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
     setInput(newValue);
   };
   
-  const handleImageAnalysis = (analysis: string, fileName: string) => {
-    const imagePrompt = `[Đã tải lên hình ảnh: ${fileName}]\n\nKết quả phân tích:\n${analysis}`;
-    setInput(imagePrompt);
-  };
-  
   const handleVoiceTranscription = (transcription: string) => {
     const newInputValue = input + (input ? ' ' : '') + transcription;
     setInput(newInputValue);
@@ -139,11 +133,6 @@ const ChatInputContainer: React.FC<ChatInputContainerProps> = ({
             <FileUploadButton 
               onFileContent={handleFileContent} 
               disabled={isLoading || isProcessingSpeech} 
-            />
-            
-            <ImageUploadButton
-              onImageAnalysis={handleImageAnalysis}
-              disabled={isLoading || isProcessingSpeech}
             />
           </div>
           

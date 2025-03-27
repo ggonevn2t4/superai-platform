@@ -1,6 +1,6 @@
 
 import React, { useRef, useState } from 'react';
-import { Image } from 'lucide-react';
+import { Image, ImagePlus } from 'lucide-react';
 import { toast } from 'sonner';
 import { analyzeImage, detectObjectsInImage } from '@/services/mediaServices';
 import { Button } from '@/components/ui/button';
@@ -126,15 +126,15 @@ Tóm tắt: ${objectSummary}`;
       <button
         type="button"
         onClick={() => imageInputRef.current?.click()}
-        className="p-3 rounded-lg border text-muted-foreground hover:text-foreground hover:bg-accent transition-colors hover:shadow-sm relative"
+        className="p-2.5 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 text-white hover:shadow-lg transition-all duration-300 relative flex items-center justify-center hover:scale-105 active:scale-95"
         title="Tải lên hình ảnh để phân tích"
         disabled={disabled || isLoading}
       >
-        <Image size={20} />
+        <ImagePlus size={24} className="text-white" />
         {isLoading && (
           <span className="absolute -top-1 -right-1 w-3 h-3">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-3 w-3 bg-primary"></span>
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
           </span>
         )}
       </button>
