@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu, Zap, LucideIcon, Diamond, Flame, Orbit, Brain, Flower, Infinity, Layers, Gem, Router } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -56,6 +55,13 @@ const models: Model[] = [
     name: 'Gemini 2.0 Flash',
     description: 'Phiên bản nhanh hơn của mô hình Gemini',
     icon: Flame,
+    providerTag: 'OpenRouter'
+  },
+  {
+    id: 'gemini-2-5-pro',
+    name: 'Gemini Pro 2.5',
+    description: 'Mô hình mạnh mẽ nhất của Google Gemini',
+    icon: Diamond,
     providerTag: 'OpenRouter'
   },
   { 

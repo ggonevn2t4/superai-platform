@@ -1,4 +1,3 @@
-
 import { OpenRouterRequest, OpenRouterResponse, OpenRouterError, OpenRouterMessage } from './types';
 import { makeOpenRouterRequest } from './utils/requestHandler';
 
@@ -67,6 +66,7 @@ export const openRouterModelMapping: Record<string, string> = {
   'gpt-4o-mini': 'openai/gpt-4o-mini',
   'gemini-2': 'google/gemini-1.5-pro-latest',
   'gemini-2-flash': 'google/gemini-1.5-flash-latest',
+  'gemini-2-5-pro': 'google/gemini-pro-2-5-latest',
   'claude-3-7': 'anthropic/claude-3-opus:beta',
   'claude-3-5-haiku': 'anthropic/claude-3-haiku:beta',
   'mistral-large': 'mistralai/mistral-large-latest',
