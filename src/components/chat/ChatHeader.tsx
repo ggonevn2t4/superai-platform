@@ -10,7 +10,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import ModelSelector from "@/components/ui/ModelSelector";
 import ExportMenu from "@/components/ui/ExportMenu";
 
 interface ChatHeaderProps {
@@ -26,26 +25,13 @@ interface ChatHeaderProps {
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
-  model,
-  setModel,
   clearChat,
   exportChatHistory,
-  showAdvancedOptions,
-  setShowAdvancedOptions,
   isLoading,
-  apiKeyError,
   isReadOnly = false
 }) => {
   return (
-    <div className="flex items-center justify-between mb-4">
-      <div className="flex items-center gap-2">
-        <ModelSelector 
-          defaultModel={model} 
-          onChange={setModel} 
-          disabled={isLoading || isReadOnly}
-        />
-      </div>
-      
+    <div className="flex items-center justify-end mb-4">
       <div className="flex items-center gap-2">
         {!isReadOnly && (
           <>
