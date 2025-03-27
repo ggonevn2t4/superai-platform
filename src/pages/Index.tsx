@@ -2,7 +2,7 @@
 import React from 'react';
 import Hero from '../components/home/Hero';
 import Features from '../components/home/Features';
-import { Bot, ArrowRight, Sparkles, Github, LogIn, LogOut, User, FileText, Info } from 'lucide-react';
+import { Bot, ArrowRight, Sparkles, LogIn, LogOut, User, Info, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -129,28 +129,51 @@ const Index: React.FC = () => {
       
       <footer className="bg-white border-t py-12">
         <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-6 md:mb-0 group">
-              <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-all duration-300">
-                <Bot size={20} className="text-primary" />
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-6 group">
+                <div className="bg-primary/10 p-2 rounded-lg group-hover:bg-primary/20 transition-all duration-300">
+                  <Bot size={20} className="text-primary" />
+                </div>
+                <span className="font-bold text-xl">SuperAI</span>
               </div>
-              <span className="font-bold text-xl">SuperAI</span>
+              
+              <p className="text-muted-foreground mb-4">
+                Nền tảng AI toàn diện giúp bạn thực hiện các tác vụ phức tạp một cách dễ dàng.
+              </p>
+              
+              <div className="text-sm text-muted-foreground">
+                &copy; {new Date().getFullYear()} SuperAI. Nền tảng AI toàn diện.
+              </div>
             </div>
             
-            <div className="flex items-center gap-6 mb-6 md:mb-0">
-              <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
-                Giới thiệu
-              </Link>
-              <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">
-                Blog
-              </Link>
-              <Link to="/help" className="text-muted-foreground hover:text-primary transition-colors">
-                Trợ giúp
-              </Link>
+            <div className="flex-1">
+              <h4 className="font-semibold mb-4">Liên kết</h4>
+              <div className="grid grid-cols-1 gap-2">
+                <Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">
+                  Giới thiệu
+                </Link>
+                <Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">
+                  Blog
+                </Link>
+                <Link to="/help" className="text-muted-foreground hover:text-primary transition-colors">
+                  Trợ giúp
+                </Link>
+              </div>
             </div>
             
-            <div className="text-sm text-muted-foreground">
-              &copy; {new Date().getFullYear()} SuperAI. Nền tảng AI toàn diện.
+            <div className="flex-1">
+              <h4 className="font-semibold mb-4">Liên hệ</h4>
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <Phone size={16} className="text-primary" />
+                  <span>Zalo/Phone: 0708684608</span>
+                </div>
+                <div className="flex items-center gap-2 text-muted-foreground">
+                  <MapPin size={16} className="text-primary" />
+                  <span>Landmark 81, Quận Bình Thạnh, TPHCM</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
