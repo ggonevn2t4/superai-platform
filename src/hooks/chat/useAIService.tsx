@@ -5,7 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Message } from '@/types/chatTypes';
 import { sendMessageToGemini } from '@/services/gemini';
-import { sendMessageToDeepSeek } from '@/services/deepseek';
+import { sendMessageToDeepSeek, sendMessageWithSystemInstructions } from '@/services/deepseek';
 import { sendMessageToOpenRouter, openRouterModelMapping } from '@/services/openrouter';
 import { DEEPSEEK_MODELS } from '@/services/deepseek/config';
 
@@ -16,7 +16,21 @@ export function useAIService() {
     model: string = 'deepseek-r1'
   ): Promise<string> => {
     try {
-      // First try OpenRouter if model matches
+      // First try DeepSeek V3 if that's the requested model
+      if (model === 'deepseek-v3') {
+        console.log('Trying DeepSeek V3 API directly...');
+        const deepseekResponse = await sendMessageWithSystemInstructions(
+          messageContent,
+          'Bạn là trợ lý AI thông minh, hữu ích và thân thiện. Hãy trả lời đầy đủ, chi tiết và chính xác các câu hỏi của người dùng bằng tiếng Việt.',
+          { model: DEEPSEEK_MODELS.V3 },
+        );
+        
+        if (typeof deepseekResponse === 'string') {
+          return deepseekResponse;
+        }
+      }
+      
+      // Then try OpenRouter if model matches
       if (openRouterModelMapping[model]) {
         console.log('Trying OpenRouter API with model:', openRouterModelMapping[model]);
         const openRouterModel = openRouterModelMapping[model];
@@ -24,20 +38,6 @@ export function useAIService() {
         
         if (typeof openRouterResponse === 'string') {
           return openRouterResponse;
-        }
-      }
-      
-      // Then try specific DeepSeek models
-      if (model === 'deepseek-v3') {
-        console.log('Trying DeepSeek V3 API directly...');
-        const deepseekResponse = await sendMessageToDeepSeek(
-          messageContent, 
-          {}, 
-          DEEPSEEK_MODELS.V3
-        );
-        
-        if (typeof deepseekResponse === 'string') {
-          return deepseekResponse;
         }
       }
       
@@ -78,13 +78,13 @@ export function useAIService() {
     }
     
     try {
-      // For DeepSeek V3, use direct API call
+      // For DeepSeek V3, use direct API call first
       if (model === 'deepseek-v3') {
         console.log('Using DeepSeek V3 model directly');
-        const deepseekResponse = await sendMessageToDeepSeek(
-          content, 
-          {}, 
-          DEEPSEEK_MODELS.V3
+        const deepseekResponse = await sendMessageWithSystemInstructions(
+          content,
+          'Bạn là trợ lý AI thông minh, hữu ích và thân thiện. Hãy trả lời đầy đủ, chi tiết và chính xác các câu hỏi của người dùng bằng tiếng Việt.',
+          { model: DEEPSEEK_MODELS.V3 },
         );
         
         if (typeof deepseekResponse === 'string') {
@@ -92,7 +92,7 @@ export function useAIService() {
         }
       }
       
-      // For models available in OpenRouter, try direct API call first
+      // For models available in OpenRouter, try direct API call if not specifically requesting Supabase
       if (openRouterModelMapping[model] && !content.includes("@supabase")) {
         console.log('Using OpenRouter directly for model:', model);
         const openRouterResponse = await sendMessageToOpenRouter(
@@ -106,25 +106,33 @@ export function useAIService() {
       }
       
       // Try Supabase function
-      const { data, error } = await supabase.functions.invoke('openai-chat', {
-        body: {
-          messages: [...messages, newMessage].map(msg => ({ role: msg.role, content: msg.content })),
-          userId: null, // User ID will be provided by Supabase Auth
-          model: model || 'deepseek-r1'
-        },
-      });
+      try {
+        console.log('Trying Supabase function with model:', model);
+        const { data, error } = await supabase.functions.invoke('openai-chat', {
+          body: {
+            messages: [...messages, newMessage].map(msg => ({ role: msg.role, content: msg.content })),
+            userId: null, 
+            model: model || 'deepseek-r1'
+          },
+        });
 
-      if (error) {
-        console.error('Error from Supabase function:', error);
+        if (error) {
+          console.error('Error from Supabase function:', error);
+          throw error;
+        } 
+        
+        return data.choices[0].message.content;
+      } catch (error) {
+        console.error('Supabase function failed, trying alternative services:', error);
         toast.error('Gặp lỗi khi kết nối với Supabase function, đang thử phương án dự phòng...');
+        
         // Try using alternative AI services
         return await tryAlternativeAIServices(content, model);
-      } else {
-        return data.choices[0].message.content;
       }
     } catch (error) {
-      console.error('Lỗi khi kết nối với Supabase function, đang thử phương án dự phòng:', error);
+      console.error('Lỗi khi xử lý tin nhắn:', error);
       toast.error('Đang thử kết nối với dịch vụ AI thay thế...');
+      
       // Try using alternative AI services
       return await tryAlternativeAIServices(content, model);
     }
