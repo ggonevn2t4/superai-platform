@@ -6,7 +6,8 @@
 import { 
   DEFAULT_MODEL,
   DEFAULT_TEMPERATURE,
-  DEFAULT_MAX_TOKENS
+  DEFAULT_MAX_TOKENS,
+  DEEPSEEK_MODELS
 } from './config';
 import { 
   DeepSeekRequest, 
@@ -27,12 +28,16 @@ import {
  */
 export const sendMessageToDeepSeek = async (
   messageContent: string, 
-  config: DeepSeekConfig = {}
+  config: DeepSeekConfig = {},
+  modelOverride?: string
 ): Promise<string | DeepSeekError> => {
   try {
+    // Select model - use override if provided, otherwise use config or default
+    const modelToUse = modelOverride || config.model || DEFAULT_MODEL;
+    
     // Generate cache key based on message and configuration
     const cacheKey = generateDeepSeekCacheKey(
-      'deepseek',
+      modelToUse,
       messageContent,
       undefined,
       config
@@ -45,7 +50,7 @@ export const sendMessageToDeepSeek = async (
     }
     
     const requestBody: DeepSeekRequest = {
-      model: DEFAULT_MODEL,
+      model: modelToUse,
       messages: [
         {
           role: 'user',
@@ -78,12 +83,16 @@ export const sendMessageToDeepSeek = async (
 export const sendMessageWithSystemInstructions = async (
   messageContent: string,
   systemInstructions: string,
-  config: DeepSeekConfig = {}
+  config: DeepSeekConfig = {},
+  modelOverride?: string
 ): Promise<string | DeepSeekError> => {
   try {
+    // Select model - use override if provided, otherwise use config or default
+    const modelToUse = modelOverride || config.model || DEFAULT_MODEL;
+    
     // Generate cache key based on message, system instructions, and configuration
     const cacheKey = generateDeepSeekCacheKey(
-      'deepseek-system',
+      `${modelToUse}-system`,
       messageContent,
       systemInstructions,
       config
@@ -96,7 +105,7 @@ export const sendMessageWithSystemInstructions = async (
     }
     
     const requestBody: DeepSeekRequest = {
-      model: DEFAULT_MODEL,
+      model: modelToUse,
       messages: [
         {
           role: 'system',

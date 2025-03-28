@@ -12,6 +12,12 @@ export const DEEPSEEK_API_URL = 'https://api.deepseek.com/v1/chat/completions';
 // Default model
 export const DEFAULT_MODEL = 'deepseek-chat';
 
+// DeepSeek model versions
+export const DEEPSEEK_MODELS = {
+  DEFAULT: 'deepseek-chat',
+  V3: 'deepseek-v3.0-0324',
+};
+
 // Default request parameters
 export const DEFAULT_TEMPERATURE = 0.7;
 export const DEFAULT_MAX_TOKENS = 2048;

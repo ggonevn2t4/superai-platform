@@ -7,6 +7,7 @@ import { Message } from '@/types/chatTypes';
 import { sendMessageToGemini } from '@/services/gemini';
 import { sendMessageToDeepSeek } from '@/services/deepseek';
 import { sendMessageToOpenRouter, openRouterModelMapping } from '@/services/openrouter';
+import { DEEPSEEK_MODELS } from '@/services/deepseek/config';
 
 export function useAIService() {
   // Function to try alternative AI services when Supabase function fails
@@ -26,8 +27,22 @@ export function useAIService() {
         }
       }
       
-      // Then try Gemini
-      console.log('OpenRouter failed or not configured for model. Trying Gemini API as fallback...');
+      // Then try specific DeepSeek models
+      if (model === 'deepseek-v3') {
+        console.log('Trying DeepSeek V3 API directly...');
+        const deepseekResponse = await sendMessageToDeepSeek(
+          messageContent, 
+          {}, 
+          DEEPSEEK_MODELS.V3
+        );
+        
+        if (typeof deepseekResponse === 'string') {
+          return deepseekResponse;
+        }
+      }
+      
+      // Try Gemini
+      console.log('Trying Gemini API as fallback...');
       const geminiResponse = await sendMessageToGemini(messageContent);
       
       if (typeof geminiResponse === 'string') {
@@ -63,6 +78,20 @@ export function useAIService() {
     }
     
     try {
+      // For DeepSeek V3, use direct API call
+      if (model === 'deepseek-v3') {
+        console.log('Using DeepSeek V3 model directly');
+        const deepseekResponse = await sendMessageToDeepSeek(
+          content, 
+          {}, 
+          DEEPSEEK_MODELS.V3
+        );
+        
+        if (typeof deepseekResponse === 'string') {
+          return deepseekResponse;
+        }
+      }
+      
       // For models available in OpenRouter, try direct API call first
       if (openRouterModelMapping[model] && !content.includes("@supabase")) {
         console.log('Using OpenRouter directly for model:', model);

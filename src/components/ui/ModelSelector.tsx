@@ -1,5 +1,6 @@
+
 import React, { useState } from 'react';
-import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu, Zap, LucideIcon, Diamond, Flame, Orbit, Brain, Flower, Infinity, Layers, Gem, Router } from 'lucide-react';
+import { Check, ChevronDown, Bot, Sparkles, Wand, Cpu, Zap, LucideIcon, Diamond, Flame, Orbit, Brain, Flower, Infinity, Layers, Gem, Router, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Model {
@@ -8,6 +9,7 @@ interface Model {
   description: string;
   icon: LucideIcon; // Use LucideIcon type from lucide-react
   providerTag?: string; // Optional tag to show provider
+  isNew?: boolean; // Optional flag to highlight new models
 }
 
 interface ModelSelectorProps {
@@ -25,9 +27,10 @@ const models: Model[] = [
   },
   { 
     id: 'deepseek-v3', 
-    name: 'DeepSeek V3', 
-    description: 'Phiên bản mới nhất của DeepSeek',
-    icon: Zap
+    name: 'DeepSeek V3-0324', 
+    description: 'Phiên bản mới nhất của DeepSeek - 2024',
+    icon: Zap,
+    isNew: true
   },
   { 
     id: 'gpt-4o', 
@@ -35,6 +38,14 @@ const models: Model[] = [
     description: 'Mô hình mạnh mẽ nhất của OpenAI',
     icon: Sparkles,
     providerTag: 'OpenRouter'
+  },
+  { 
+    id: 'gpt-4-5', 
+    name: 'GPT-4.5', 
+    description: 'Phiên bản tiên tiến nhất của OpenAI',
+    icon: Star,
+    providerTag: 'OpenRouter',
+    isNew: true
   },
   { 
     id: 'gpt-4o-mini', 
@@ -142,6 +153,11 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 
           {React.createElement(selectedModel.icon, { size: 16 })}
         </span>
         <span className="text-sm font-medium">{selectedModel.name}</span>
+        {selectedModel.isNew && (
+          <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+            Mới
+          </span>
+        )}
         {selectedModel.providerTag && (
           <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 flex items-center">
             <Router className="w-3 h-3 mr-0.5" />
@@ -173,7 +189,14 @@ const ModelSelector: React.FC<ModelSelectorProps> = ({ onChange, defaultModel = 
                   </div>
                   <div className="flex flex-col items-start flex-1">
                     <div className="flex items-center justify-between w-full">
-                      <span className="font-medium">{model.name}</span>
+                      <div className="flex items-center gap-1">
+                        <span className="font-medium">{model.name}</span>
+                        {model.isNew && (
+                          <span className="text-xs px-1.5 py-0.5 rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                            Mới
+                          </span>
+                        )}
+                      </div>
                       {model.providerTag && (
                         <span className="text-xs px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 flex items-center">
                           <Router className="w-3 h-3 mr-0.5" />

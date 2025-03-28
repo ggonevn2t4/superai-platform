@@ -1,3 +1,4 @@
+
 import { OpenRouterRequest, OpenRouterResponse, OpenRouterError, OpenRouterMessage } from './types';
 import { makeOpenRouterRequest } from './utils/requestHandler';
 
@@ -63,6 +64,7 @@ export const sendMessageToOpenRouter = async (
 // OpenRouter model mapping for compatibility with our UI
 export const openRouterModelMapping: Record<string, string> = {
   'gpt-4o': 'openai/gpt-4o',
+  'gpt-4-5': 'openai/gpt-4-turbo',
   'gpt-4o-mini': 'openai/gpt-4o-mini',
   'gemini-2': 'google/gemini-1.5-pro-latest',
   'gemini-2-flash': 'google/gemini-1.5-flash-latest',
@@ -72,5 +74,5 @@ export const openRouterModelMapping: Record<string, string> = {
   'mistral-large': 'mistralai/mistral-large-latest',
   'llama-3-70b': 'meta-llama/llama-3-70b-instruct',
   'deepseek-r1': 'deepseek/deepseek-chat',
-  'deepseek-v3': 'deepseek/deepseek-v2',
+  'deepseek-v3': 'deepseek/deepseek-v3.0-0324',
 };
