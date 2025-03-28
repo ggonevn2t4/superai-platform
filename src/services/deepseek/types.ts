@@ -40,6 +40,7 @@ export interface DeepSeekConfig {
   temperature?: number;
   maxTokens?: number;
   skipCache?: boolean;
+  model?: string;  // Added model property to fix the error
 }
 
 export interface DeepSeekError {
